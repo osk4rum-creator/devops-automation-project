@@ -1,0 +1,4 @@
+# Keep Linux line endings (LF) in every text file, even on Windows.
+# Shell scripts, Dockerfiles and YAML run inside Linux containers and Jenkins
+# agents, where Windows line endings (CRLF) break them ("bad interpreter").
+* text=auto eol=lf
