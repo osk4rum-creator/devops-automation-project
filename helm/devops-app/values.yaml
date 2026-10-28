@@ -1,0 +1,52 @@
+# Default values for the devops-app chart (local k3d cluster).
+# Override with --set image.tag=<git sha> (required) or -f values-<env>.yaml
+
+image:
+  registry: ""            # local k3d: empty (images are imported). Task 4: "ghcr.io/<user>/"
+  tag: ""                 # REQUIRED - git short SHA, never "latest"
+  pullPolicy: IfNotPresent
+
+# Non-sensitive settings -> ConfigMap "app-config" -> env vars in the pods.
+# Passwords and keys never go here; they live in Secrets (see scripts/deploy-local.sh).
+config:
+  DB_HOST: postgres       # name of the PostgreSQL Service below
+  DB_PORT: "5432"
+  DB_NAME: appdb
+  AWS_REGION: eu-central-1
+  S3_BUCKET: ""           # from `terraform output s3_bucket_name` (empty = uploads disabled)
+  SNS_TOPIC_ARN: ""       # from `terraform output sns_topic_arn` (empty = email disabled)
+  POLL_SECONDS: "10"      # how often the worker checks for new uploads
+
+frontend:
+  replicas: 2
+  port: 8080              # nginx-unprivileged listens on 8080 (non-root can't use 80)
+  resources:
+    requests: { cpu: 50m, memory: 32Mi }
+    limits: { cpu: 200m, memory: 64Mi }
+
+backend:
+  replicas: 2
+  port: 8000
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 256Mi }
+
+worker:
+  replicas: 1
+  resources:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits: { cpu: 200m, memory: 128Mi }
+
+# PostgreSQL inside the cluster - for practice only (production would use RDS:
+# managed backups, failover and patching). Disable when pointing at RDS.
+postgres:
+  enabled: true
+  image: postgres:17.6-alpine
+  storage: 1Gi
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 512Mi }
+
+ingress:
+  className: traefik      # k3d's built-in ingress controller
+  host: ""                # empty = any hostname (http://localhost:8080)

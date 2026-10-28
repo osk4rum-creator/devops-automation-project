@@ -1,0 +1,16 @@
+# Terraform – state files can contain secrets and resource IDs, never commit them
+*.tfstate
+*.tfstate.*
+.terraform/
+*.tfvars
+!*.tfvars.example
+
+# Secrets and keys – real values live only on your machine / in the cluster
+secrets/
+*.pem
+.env
+
+# Python
+__pycache__/
+*.pyc
+.venv/

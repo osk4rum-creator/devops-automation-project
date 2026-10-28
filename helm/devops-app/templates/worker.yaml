@@ -1,0 +1,57 @@
+# Worker: background loop that emails (SNS) about new uploads.
+# It receives no traffic, so it has NO Service - nothing can connect to it.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker
+  labels:
+    {{- include "app.labels" "worker" | nindent 4 }}
+spec:
+  replicas: {{ .Values.worker.replicas }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" "worker" | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "app.labels" "worker" | nindent 8 }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: worker
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: worker
+          image: {{ include "app.image" (dict "root" $ "name" "worker") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef: { name: app-config }
+            - secretRef: { name: db-credentials }
+            - secretRef: { name: aws-credentials, optional: true }
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+          # No HTTP server, so the probes check the heartbeat file the worker
+          # touches on every loop: older than 60s means the loop is stuck.
+          readinessProbe:
+            exec:
+              command: ["sh", "-c", "test $(( $(date +%s) - $(stat -c %Y /tmp/heartbeat) )) -lt 60"]
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: ["sh", "-c", "test $(( $(date +%s) - $(stat -c %Y /tmp/heartbeat) )) -lt 60"]
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp             # heartbeat file lives here
+      volumes:
+        - name: tmp
+          emptyDir: {}

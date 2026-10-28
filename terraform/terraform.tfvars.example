@@ -1,0 +1,4 @@
+# Copy to terraform.tfvars (gitignored) and fill in your values.
+alert_email = "you@example.com"
+# aws_region   = "eu-central-1"
+# project_name = "devops-app"

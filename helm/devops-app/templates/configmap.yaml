@@ -1,0 +1,9 @@
+# Non-sensitive configuration, injected into backend and worker as env vars.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  labels:
+    app.kubernetes.io/part-of: devops-app
+data:
+  {{- toYaml .Values.config | nindent 2 }}

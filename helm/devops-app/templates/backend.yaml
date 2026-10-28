@@ -1,0 +1,73 @@
+# Backend API: internal only. Reached by nginx through the "backend" Service,
+# never exposed to the internet.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    {{- include "app.labels" "backend" | nindent 4 }}
+spec:
+  replicas: {{ .Values.backend.replicas }}
+  selector:
+    matchLabels:
+      {{- include "app.selectorLabels" "backend" | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "app.labels" "backend" | nindent 8 }}
+      annotations:
+        # Restart pods automatically when the ConfigMap changes
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    spec:
+      serviceAccountName: backend
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001                  # same UID as USER in the Dockerfile
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: backend
+          image: {{ include "app.image" (dict "root" $ "name" "backend") }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.port }}
+          envFrom:
+            - configMapRef: { name: app-config }        # DB_HOST, S3_BUCKET, ...
+            - secretRef: { name: db-credentials }       # DB_USER, DB_PASSWORD
+            - secretRef: { name: aws-credentials, optional: true }  # local only; absent = AWS disabled
+          resources:
+            {{- toYaml .Values.backend.resources | nindent 12 }}
+          # Readiness: only send traffic once the DB is reachable
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            periodSeconds: 5
+          # Liveness: restart only if the process itself is stuck
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp             # gunicorn needs a writable /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend                           # becomes the DNS name nginx proxies to
+  labels:
+    {{- include "app.labels" "backend" | nindent 4 }}
+spec:
+  type: ClusterIP                         # internal only
+  selector:
+    {{- include "app.selectorLabels" "backend" | nindent 4 }}
+  ports:
+    - name: http
+      port: {{ .Values.backend.port }}
+      targetPort: http

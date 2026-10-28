@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DevOps App</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #222; }
+    section { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
+    input[type=text] { width: 70%; padding: .4rem; }
+    button { padding: .4rem .8rem; }
+    li { margin: .25rem 0; }
+    .muted { color: #777; font-size: .85rem; }
+    #status { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>DevOps App</h1>
+  <p>Backend status: <span id="status">checking…</span></p>
+
+  <section>
+    <h2>Notes (PostgreSQL)</h2>
+    <form id="note-form">
+      <input type="text" id="note-text" placeholder="Write a note" required>
+      <button type="submit">Save</button>
+    </form>
+    <ul id="notes"></ul>
+  </section>
+
+  <section>
+    <h2>Files (S3 + SNS email)</h2>
+    <form id="upload-form">
+      <input type="file" id="file" required>
+      <button type="submit">Upload</button>
+    </form>
+    <p id="upload-msg" class="muted"></p>
+    <ul id="uploads"></ul>
+  </section>
+
+  <script>
+    const el = (id) => document.getElementById(id);
+
+    async function refresh() {
+      try {
+        const health = await fetch('/api/health');
+        el('status').textContent = health.ok ? 'ready' : 'not ready';
+        const notes = await (await fetch('/api/notes')).json();
+        el('notes').innerHTML = notes.map(n =>
+          `<li>${escapeHtml(n.text)} <span class="muted">${n.created_at}</span></li>`).join('');
+        const uploads = await (await fetch('/api/uploads')).json();
+        el('uploads').innerHTML = uploads.map(u =>
+          `<li>${escapeHtml(u.filename)} <span class="muted">${u.notified ? 'email sent' : 'pending email'}</span></li>`).join('');
+      } catch (e) {
+        el('status').textContent = 'unreachable';
+      }
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    el('note-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await fetch('/api/notes', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: el('note-text').value}),
+      });
+      el('note-text').value = '';
+      refresh();
+    });
+
+    el('upload-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const body = new FormData();
+      body.append('file', el('file').files[0]);
+      const res = await fetch('/api/upload', {method: 'POST', body});
+      const data = await res.json();
+      el('upload-msg').textContent = res.ok ? `Uploaded ${data.filename}` : `Error: ${data.error}`;
+      refresh();
+    });
+
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>

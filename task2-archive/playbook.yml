@@ -1,0 +1,33 @@
+---
+- name: "Phase 1: Standard Infrastructure Baseline Configuration"
+  hosts: all
+  become: true  # Runs commands with sudo privileges
+  gather_facts: true
+
+  tasks:
+    - name: Ensure system package cache is up to date
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install baseline system utility tools
+      apt:
+        name:
+          - curl
+          - git
+          - unzip
+          - python3-pip
+          - python3-venv
+        state: present
+
+    - name: Create structured deployment directories
+      file:
+        path: "/home/ubuntu/app/{{ item }}"
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: '0755'
+      loop:
+        - "frontend"
+        - "backend"
+        - "worker"

@@ -1,0 +1,35 @@
+# nginx is the system's single entry point: serves the web page and
+# reverse-proxies /api/ to the backend Service inside the cluster.
+#
+# This is a TEMPLATE: at container start the nginx image replaces ${VARS}
+# with environment variables and writes the result to /etc/nginx/conf.d/.
+server {
+    listen 8080;                 # unprivileged image: non-root can't bind port 80
+    server_name _;
+    client_max_body_size 10m;    # matches the backend upload limit
+
+    # Look up the backend's address when a request arrives, not only once at
+    # startup. Without this, nginx crashes if cluster DNS isn't ready yet when
+    # it starts (e.g. after the cluster reboots). NGINX_LOCAL_RESOLVERS is the
+    # DNS server from /etc/resolv.conf, filled in by the image's entrypoint.
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
+    set $backend_upstream http://${BACKEND_HOST}:8000;
+
+    location / {
+        root  /usr/share/nginx/html;
+        index index.html;
+    }
+
+    location /api/ {
+        proxy_pass $backend_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Probe endpoint for nginx itself (doesn't depend on the backend)
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+}
