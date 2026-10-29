@@ -1,0 +1,77 @@
+# Recent logs of each component - collected 2026-10-29 10:46
+
+$ kubectl logs frontend-6b9ddd5d89-4dzzz -n devops-app --tail=25
+/docker-entrypoint.sh: Configuration complete; ready for start up
+2026/10/29 08:36:00 [notice] 1#1: using the "epoll" event method
+2026/10/29 08:36:00 [notice] 1#1: nginx/1.30.6
+2026/10/29 08:36:00 [notice] 1#1: built by gcc 15.2.0 (Alpine 15.2.0) 
+2026/10/29 08:36:00 [notice] 1#1: OS: Linux 6.18.54.1-microsoft-standard-WSL2
+2026/10/29 08:36:00 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2026/10/29 08:36:00 [notice] 1#1: start worker processes
+2026/10/29 08:36:00 [notice] 1#1: start worker process 26
+2026/10/29 08:36:00 [notice] 1#1: start worker process 27
+2026/10/29 08:36:00 [notice] 1#1: start worker process 28
+2026/10/29 08:36:00 [notice] 1#1: start worker process 29
+2026/10/29 08:36:00 [notice] 1#1: start worker process 30
+2026/10/29 08:36:00 [notice] 1#1: start worker process 31
+2026/10/29 08:36:00 [notice] 1#1: start worker process 32
+2026/10/29 08:36:00 [notice] 1#1: start worker process 33
+10.42.1.32 - - [29/Oct/2026:08:39:02 +0000] "GET /api/health HTTP/1.1" 200 19 "-" "curl/8.17.0" "10.42.2.0"
+10.42.1.32 - - [29/Oct/2026:08:39:03 +0000] "GET /api/notes HTTP/1.1" 200 255 "-" "curl/8.17.0" "10.42.1.1"
+10.42.1.32 - - [29/Oct/2026:08:39:24 +0000] "GET /api/health HTTP/1.1" 200 19 "-" "curl/8.17.0" "10.42.0.0"
+10.42.1.32 - - [29/Oct/2026:08:39:39 +0000] "GET /api/notes HTTP/1.1" 200 255 "-" "curl/8.17.0" "10.42.2.0"
+10.42.1.32 - - [29/Oct/2026:08:39:46 +0000] "GET /api/health HTTP/1.1" 200 19 "-" "curl/8.17.0" "10.42.1.1"
+10.42.1.32 - - [29/Oct/2026:08:40:41 +0000] "GET /api/health HTTP/1.1" 200 19 "-" "curl/8.17.0" "10.42.0.0"
+10.42.1.32 - - [29/Oct/2026:08:40:42 +0000] "GET /api/notes HTTP/1.1" 200 344 "-" "curl/8.17.0" "10.42.2.0"
+10.42.1.32 - - [29/Oct/2026:08:41:03 +0000] "GET /api/health HTTP/1.1" 200 19 "-" "curl/8.17.0" "10.42.1.1"
+10.42.1.32 - - [29/Oct/2026:08:41:18 +0000] "GET /api/notes HTTP/1.1" 200 344 "-" "curl/8.17.0" "10.42.0.0"
+10.42.1.32 - - [29/Oct/2026:08:41:25 +0000] "GET /api/health HTTP/1.1" 200 19 "-" "curl/8.17.0" "10.42.2.0"
+
+$ kubectl logs backend-75997d9c94-jm9cs -n devops-app --tail=25
+10.42.2.1 - - [29/Oct/2026:08:44:57 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:00 +0000] "GET /healthz HTTP/1.1" 200 16 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:02 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:07 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:10 +0000] "GET /healthz HTTP/1.1" 200 16 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:12 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:17 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:20 +0000] "GET /healthz HTTP/1.1" 200 16 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:22 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:27 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:30 +0000] "GET /healthz HTTP/1.1" 200 16 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:32 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:37 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:40 +0000] "GET /healthz HTTP/1.1" 200 16 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:42 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:47 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:50 +0000] "GET /healthz HTTP/1.1" 200 16 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:52 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:45:57 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:46:00 +0000] "GET /healthz HTTP/1.1" 200 16 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:46:02 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:46:07 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:46:10 +0000] "GET /healthz HTTP/1.1" 200 16 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:46:12 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+10.42.2.1 - - [29/Oct/2026:08:46:17 +0000] "GET /readyz HTTP/1.1" 200 19 "-" "kube-probe/1.35"
+
+$ kubectl logs worker-59bdf766d5-qnmhq -n devops-app --tail=25
+2026-10-29 08:36:03,729 INFO worker started, polling every 10s
+2026-10-29 08:39:03,881 INFO SNS not configured, would send: New file uploaded: evidence.txt (s3:///uploads/evidence.txt)
+2026-10-29 08:40:43,958 INFO SNS not configured, would send: New file uploaded: evidence.txt (s3:///uploads/evidence.txt)
+2026-10-29 08:41:03,968 ERROR poll failed: connection failed: connection to server at "10.43.172.66", port 5432 failed: Connection refused
+	Is the server running on that host and accepting TCP/IP connections?
+
+$ kubectl logs postgres-0 -n devops-app --tail=25
+chmod: /var/run/postgresql: Operation not permitted
+
+PostgreSQL Database directory appears to contain a database; Skipping initialization
+
+2026-10-29 08:41:05.276 UTC [1] LOG:  starting PostgreSQL 17.11 on x86_64-pc-linux-musl, compiled by gcc (Alpine 15.2.0) 15.2.0, 64-bit
+2026-10-29 08:41:05.276 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2026-10-29 08:41:05.276 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2026-10-29 08:41:05.279 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2026-10-29 08:41:05.283 UTC [16] LOG:  database system was shut down at 2026-10-29 08:41:03 UTC
+2026-10-29 08:41:05.288 UTC [1] LOG:  database system is ready to accept connections
+2026-10-29 08:46:05.351 UTC [14] LOG:  checkpoint starting: time
+2026-10-29 08:46:05.360 UTC [14] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.003 s, sync=0.001 s, total=0.010 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/198CA28, redo lsn=0/198C9D0
+

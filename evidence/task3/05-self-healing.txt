@@ -1,0 +1,34 @@
+# Pod restart tests - collected 2026-10-29 10:46
+
+## backend pods before
+$ kubectl get pods -n devops-app -l app.kubernetes.io/name=backend
+NAME                       READY   STATUS    RESTARTS   AGE
+backend-75997d9c94-jm9cs   1/1     Running   0          5m39s
+backend-75997d9c94-vgt59   1/1     Running   0          5m39s
+
+$ kubectl delete pod -n devops-app -l app.kubernetes.io/name=backend
+pod "backend-75997d9c94-jm9cs" deleted from devops-app namespace
+pod "backend-75997d9c94-vgt59" deleted from devops-app namespace
+
+$ kubectl rollout status deployment/backend -n devops-app --timeout=120s
+Waiting for deployment "backend" rollout to finish: 0 of 2 updated replicas are available...
+Waiting for deployment "backend" rollout to finish: 1 of 2 updated replicas are available...
+deployment "backend" successfully rolled out
+
+## backend pods after (new names, AGE of seconds)
+$ kubectl get pods -n devops-app -l app.kubernetes.io/name=backend
+NAME                       READY   STATUS    RESTARTS   AGE
+backend-75997d9c94-jwjtw   1/1     Running   0          7s
+backend-75997d9c94-vhxn2   1/1     Running   0          7s
+
+$ curl -s http://localhost:8080/api/health
+{"status":"ready"}
+
+## database pod restart - data must survive (PersistentVolume)
+$ kubectl delete pod postgres-0 -n devops-app
+pod "postgres-0" deleted from devops-app namespace
+
+$ kubectl wait --for=condition=ready pod/postgres-0 -n devops-app --timeout=120s
+pod/postgres-0 condition met
+
+Notes before restart: 5   after restart: 5

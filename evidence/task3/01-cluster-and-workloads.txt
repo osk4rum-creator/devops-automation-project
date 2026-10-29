@@ -1,0 +1,82 @@
+# Cluster, namespace and workloads - collected 2026-10-29 10:46
+
+$ kubectl get nodes -o wide
+NAME                  STATUS   ROLES           AGE    VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE           KERNEL-VERSION                      CONTAINER-RUNTIME
+k3d-devops-agent-0    Ready    <none>          3d6h   v1.35.5+k3s1   172.19.0.2    <none>        K3s v1.35.5+k3s1   6.18.54.1-microsoft-standard-WSL2   containerd://2.2.3-k3s1
+k3d-devops-agent-1    Ready    <none>          3d6h   v1.35.5+k3s1   172.19.0.4    <none>        K3s v1.35.5+k3s1   6.18.54.1-microsoft-standard-WSL2   containerd://2.2.3-k3s1
+k3d-devops-server-0   Ready    control-plane   3d6h   v1.35.5+k3s1   172.19.0.5    <none>        K3s v1.35.5+k3s1   6.18.54.1-microsoft-standard-WSL2   containerd://2.2.3-k3s1
+
+$ kubectl get namespaces
+NAME              STATUS   AGE
+default           Active   3d6h
+devops-app        Active   2d20h
+kube-node-lease   Active   3d6h
+kube-public       Active   3d6h
+kube-system       Active   3d6h
+
+$ kubectl get pods -n devops-app -o wide
+NAME                        READY   STATUS    RESTARTS   AGE     IP           NODE                  NOMINATED NODE   READINESS GATES
+backend-75997d9c94-jm9cs    1/1     Running   0          5m14s   10.42.2.35   k3d-devops-server-0   <none>           <none>
+backend-75997d9c94-vgt59    1/1     Running   0          5m14s   10.42.1.44   k3d-devops-agent-1    <none>           <none>
+frontend-6b9ddd5d89-4dzzz   1/1     Running   0          10m     10.42.0.48   k3d-devops-agent-0    <none>           <none>
+frontend-6b9ddd5d89-dvgmj   1/1     Running   0          10m     10.42.1.42   k3d-devops-agent-1    <none>           <none>
+postgres-0                  1/1     Running   0          5m10s   10.42.2.36   k3d-devops-server-0   <none>           <none>
+worker-59bdf766d5-qnmhq     1/1     Running   0          10m     10.42.2.31   k3d-devops-server-0   <none>           <none>
+
+$ kubectl get deployments,statefulsets -n devops-app
+NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/backend    2/2     2            2           2d20h
+deployment.apps/frontend   2/2     2            2           2d20h
+deployment.apps/worker     1/1     1            1           2d20h
+
+NAME                        READY   AGE
+statefulset.apps/postgres   1/1     2d20h
+
+$ kubectl get services -n devops-app
+NAME       TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+backend    ClusterIP   10.43.42.245    <none>        8000/TCP   2d20h
+frontend   ClusterIP   10.43.218.194   <none>        80/TCP     2d20h
+postgres   ClusterIP   10.43.172.66    <none>        5432/TCP   2d20h
+
+$ kubectl get ingress -n devops-app
+NAME       CLASS     HOSTS   ADDRESS                            PORTS   AGE
+frontend   traefik   *       172.19.0.2,172.19.0.4,172.19.0.5   80      2d20h
+
+$ kubectl get configmaps,secrets,serviceaccounts,pvc,networkpolicies -n devops-app
+NAME                         DATA   AGE
+configmap/app-config         7      2d20h
+configmap/kube-root-ca.crt   1      2d20h
+
+NAME                                      TYPE                 DATA   AGE
+secret/db-credentials                     Opaque               2      2d20h
+secret/sh.helm.release.v1.devops-app.v1   helm.sh/release.v1   1      2d20h
+secret/sh.helm.release.v1.devops-app.v2   helm.sh/release.v1   1      21h
+secret/sh.helm.release.v1.devops-app.v3   helm.sh/release.v1   1      21h
+secret/sh.helm.release.v1.devops-app.v4   helm.sh/release.v1   1      50m
+secret/sh.helm.release.v1.devops-app.v5   helm.sh/release.v1   1      47m
+secret/sh.helm.release.v1.devops-app.v6   helm.sh/release.v1   1      14m
+secret/sh.helm.release.v1.devops-app.v7   helm.sh/release.v1   1      11m
+secret/sh.helm.release.v1.devops-app.v8   helm.sh/release.v1   1      10m
+
+NAME                      AGE
+serviceaccount/backend    2d20h
+serviceaccount/default    2d20h
+serviceaccount/frontend   2d20h
+serviceaccount/postgres   2d20h
+serviceaccount/worker     2d20h
+
+NAME                                    STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+persistentvolumeclaim/data-postgres-0   Bound    pvc-0224e069-4c21-4062-ac4c-67d8504c1def   1Gi        RWO            local-path     <unset>                 2d20h
+
+NAME                                               POD-SELECTOR                      AGE
+networkpolicy.networking.k8s.io/allow-dns          <none>                            21h
+networkpolicy.networking.k8s.io/backend            app.kubernetes.io/name=backend    21h
+networkpolicy.networking.k8s.io/default-deny-all   <none>                            21h
+networkpolicy.networking.k8s.io/frontend           app.kubernetes.io/name=frontend   21h
+networkpolicy.networking.k8s.io/postgres           app.kubernetes.io/name=postgres   21h
+networkpolicy.networking.k8s.io/worker             app.kubernetes.io/name=worker     21h
+
+$ helm list -n devops-app
+NAME      	NAMESPACE 	REVISION	UPDATED                              	STATUS  	CHART           	APP VERSION
+devops-app	devops-app	8       	2026-10-29 10:35:58.6425424 +0200 IST	deployed	devops-app-0.1.0	1.0.0      
+

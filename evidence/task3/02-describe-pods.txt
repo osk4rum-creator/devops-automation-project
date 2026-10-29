@@ -1,0 +1,289 @@
+# kubectl describe for each component - collected 2026-10-29 10:46
+
+$ kubectl describe pod frontend-6b9ddd5d89-4dzzz -n devops-app
+Name:             frontend-6b9ddd5d89-4dzzz
+Namespace:        devops-app
+Priority:         0
+Service Account:  frontend
+Node:             k3d-devops-agent-0/172.19.0.2
+Start Time:       Thu, 29 Oct 2026 10:36:00 +0200
+Labels:           app.kubernetes.io/managed-by=Helm
+                  app.kubernetes.io/name=frontend
+                  app.kubernetes.io/part-of=devops-app
+                  pod-template-hash=6b9ddd5d89
+Annotations:      kubectl.kubernetes.io/restartedAt: 2026-10-28T13:15:12+02:00
+Status:           Running
+SeccompProfile:   RuntimeDefault
+IP:               10.42.0.48
+IPs:
+  IP:           10.42.0.48
+Controlled By:  ReplicaSet/frontend-6b9ddd5d89
+Containers:
+  frontend:
+    Container ID:   containerd://715e4d5c7380128e9b167a3b621d8096b752659c89df389428599074b838203f
+    Image:          devops-app/frontend:088d40c
+    Image ID:       sha256:080a1142018eec984085e9597da6e2a7b143fc677b5b1cf7e706a9f72405164d
+    Port:           8080/TCP (http)
+    Host Port:      0/TCP (http)
+    State:          Running
+      Started:      Thu, 29 Oct 2026 10:36:00 +0200
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     200m
+      memory:  64Mi
+    Requests:
+      cpu:      50m
+      memory:   32Mi
+    Liveness:   http-get http://:http/healthz delay=5s timeout=1s period=10s successThreshold=1 failureThreshold=3
+    Readiness:  http-get http://:http/healthz delay=0s timeout=1s period=5s successThreshold=1 failureThreshold=3
+    Environment:
+      BACKEND_HOST:  backend.devops-app.svc.cluster.local
+    Mounts:
+      /etc/nginx/conf.d from conf (rw)
+      /tmp from tmp (rw)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  tmp:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+  conf:
+    Type:        EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:      
+    SizeLimit:   <unset>
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  10m   default-scheduler  Successfully assigned devops-app/frontend-6b9ddd5d89-4dzzz to k3d-devops-agent-0
+  Normal  Pulled     10m   kubelet            spec.containers{frontend}: Container image "devops-app/frontend:088d40c" already present on machine and can be accessed by the pod
+  Normal  Created    10m   kubelet            spec.containers{frontend}: Container created
+  Normal  Started    10m   kubelet            spec.containers{frontend}: Container started
+
+$ kubectl describe pod backend-75997d9c94-jm9cs -n devops-app
+Name:             backend-75997d9c94-jm9cs
+Namespace:        devops-app
+Priority:         0
+Service Account:  backend
+Node:             k3d-devops-server-0/172.19.0.5
+Start Time:       Thu, 29 Oct 2026 10:41:00 +0200
+Labels:           app.kubernetes.io/managed-by=Helm
+                  app.kubernetes.io/name=backend
+                  app.kubernetes.io/part-of=devops-app
+                  pod-template-hash=75997d9c94
+Annotations:      checksum/config: 48e67e93d11e72b980da65be0500520a707f4c94ea6f6bebc7e716c43eb70ed0
+Status:           Running
+SeccompProfile:   RuntimeDefault
+IP:               10.42.2.35
+IPs:
+  IP:           10.42.2.35
+Controlled By:  ReplicaSet/backend-75997d9c94
+Containers:
+  backend:
+    Container ID:   containerd://4cab9010acfa9661949eaf0a41228059b073dcc3cfb2b202434c07dcd45d8eaf
+    Image:          devops-app/backend:088d40c
+    Image ID:       sha256:951adf367322d3bfa4ca381d4cee5870840609e0272229df5c7a0bb53d97e2aa
+    Port:           8000/TCP (http)
+    Host Port:      0/TCP (http)
+    State:          Running
+      Started:      Thu, 29 Oct 2026 10:41:00 +0200
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  256Mi
+    Requests:
+      cpu:      100m
+      memory:   128Mi
+    Liveness:   http-get http://:http/healthz delay=10s timeout=1s period=10s successThreshold=1 failureThreshold=3
+    Readiness:  http-get http://:http/readyz delay=0s timeout=1s period=5s successThreshold=1 failureThreshold=3
+    Environment Variables from:
+      app-config       ConfigMap  Optional: false
+      db-credentials   Secret     Optional: false
+      aws-credentials  Secret     Optional: true
+    Environment:       <none>
+    Mounts:
+      /tmp from tmp (rw)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  tmp:
+    Type:        EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:      
+    SizeLimit:   <unset>
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type     Reason     Age    From               Message
+  ----     ------     ----   ----               -------
+  Normal   Scheduled  5m18s  default-scheduler  Successfully assigned devops-app/backend-75997d9c94-jm9cs to k3d-devops-server-0
+  Normal   Pulled     5m18s  kubelet            spec.containers{backend}: Container image "devops-app/backend:088d40c" already present on machine and can be accessed by the pod
+  Normal   Created    5m18s  kubelet            spec.containers{backend}: Container created
+  Normal   Started    5m18s  kubelet            spec.containers{backend}: Container started
+  Warning  Unhealthy  5m16s  kubelet            spec.containers{backend}: Readiness probe failed: Get "http://10.42.2.35:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+
+$ kubectl describe pod worker-59bdf766d5-qnmhq -n devops-app
+Name:             worker-59bdf766d5-qnmhq
+Namespace:        devops-app
+Priority:         0
+Service Account:  worker
+Node:             k3d-devops-server-0/172.19.0.5
+Start Time:       Thu, 29 Oct 2026 10:36:00 +0200
+Labels:           app.kubernetes.io/managed-by=Helm
+                  app.kubernetes.io/name=worker
+                  app.kubernetes.io/part-of=devops-app
+                  pod-template-hash=59bdf766d5
+Annotations:      checksum/config: 48e67e93d11e72b980da65be0500520a707f4c94ea6f6bebc7e716c43eb70ed0
+Status:           Running
+SeccompProfile:   RuntimeDefault
+IP:               10.42.2.31
+IPs:
+  IP:           10.42.2.31
+Controlled By:  ReplicaSet/worker-59bdf766d5
+Containers:
+  worker:
+    Container ID:   containerd://fe5454cb64c751025236bc1f6f7fb8c4f83f3d50590c76d8c366b2a8d023d675
+    Image:          devops-app/worker:088d40c
+    Image ID:       sha256:995f49fb7cec709ffa6c435f1348121824705cbf28c38a097ce7f752f1b10d12
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Thu, 29 Oct 2026 10:36:00 +0200
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     200m
+      memory:  128Mi
+    Requests:
+      cpu:      50m
+      memory:   64Mi
+    Liveness:   exec [sh -c test $(( $(date +%s) - $(stat -c %Y /tmp/heartbeat) )) -lt 60] delay=30s timeout=1s period=20s successThreshold=1 failureThreshold=3
+    Readiness:  exec [sh -c test $(( $(date +%s) - $(stat -c %Y /tmp/heartbeat) )) -lt 60] delay=5s timeout=1s period=10s successThreshold=1 failureThreshold=3
+    Environment Variables from:
+      app-config       ConfigMap  Optional: false
+      db-credentials   Secret     Optional: false
+      aws-credentials  Secret     Optional: true
+    Environment:       <none>
+    Mounts:
+      /tmp from tmp (rw)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  tmp:
+    Type:        EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:      
+    SizeLimit:   <unset>
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  10m   default-scheduler  Successfully assigned devops-app/worker-59bdf766d5-qnmhq to k3d-devops-server-0
+  Normal  Pulled     10m   kubelet            spec.containers{worker}: Container image "devops-app/worker:088d40c" already present on machine and can be accessed by the pod
+  Normal  Created    10m   kubelet            spec.containers{worker}: Container created
+  Normal  Started    10m   kubelet            spec.containers{worker}: Container started
+
+$ kubectl describe pod postgres-0 -n devops-app
+Name:             postgres-0
+Namespace:        devops-app
+Priority:         0
+Service Account:  postgres
+Node:             k3d-devops-server-0/172.19.0.5
+Start Time:       Thu, 29 Oct 2026 10:41:04 +0200
+Labels:           app.kubernetes.io/managed-by=Helm
+                  app.kubernetes.io/name=postgres
+                  app.kubernetes.io/part-of=devops-app
+                  apps.kubernetes.io/pod-index=0
+                  controller-revision-hash=postgres-5698f9876f
+                  statefulset.kubernetes.io/pod-name=postgres-0
+Annotations:      <none>
+Status:           Running
+SeccompProfile:   RuntimeDefault
+IP:               10.42.2.36
+IPs:
+  IP:           10.42.2.36
+Controlled By:  StatefulSet/postgres
+Containers:
+  postgres:
+    Container ID:   containerd://a433e07597d0262d93d75064f48e14f9810ca3a2ce81413ae804f68ad00289d2
+    Image:          postgres:17.11-alpine
+    Image ID:       docker.io/library/postgres@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
+    Port:           5432/TCP (postgres)
+    Host Port:      0/TCP (postgres)
+    State:          Running
+      Started:      Thu, 29 Oct 2026 10:41:05 +0200
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     500m
+      memory:  512Mi
+    Requests:
+      cpu:      100m
+      memory:   128Mi
+    Liveness:   exec [sh -c pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"] delay=30s timeout=1s period=15s successThreshold=1 failureThreshold=3
+    Readiness:  exec [sh -c pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"] delay=0s timeout=1s period=5s successThreshold=1 failureThreshold=3
+    Environment:
+      POSTGRES_DB:        appdb
+      POSTGRES_USER:      <set to the key 'DB_USER' in secret 'db-credentials'>      Optional: false
+      POSTGRES_PASSWORD:  <set to the key 'DB_PASSWORD' in secret 'db-credentials'>  Optional: false
+      PGDATA:             /var/lib/postgresql/data/pgdata
+    Mounts:
+      /tmp from tmp (rw)
+      /var/lib/postgresql/data from data (rw)
+      /var/run/postgresql from run (rw)
+Conditions:
+  Type                        Status
+  PodReadyToStartContainers   True 
+  Initialized                 True 
+  Ready                       True 
+  ContainersReady             True 
+  PodScheduled                True 
+Volumes:
+  data:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  data-postgres-0
+    ReadOnly:   false
+  run:
+    Type:       EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:     
+    SizeLimit:  <unset>
+  tmp:
+    Type:        EmptyDir (a temporary directory that shares a pod's lifetime)
+    Medium:      
+    SizeLimit:   <unset>
+QoS Class:       Burstable
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                 node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  5m14s  default-scheduler  Successfully assigned devops-app/postgres-0 to k3d-devops-server-0
+  Normal  Pulled     5m14s  kubelet            spec.containers{postgres}: Container image "postgres:17.11-alpine" already present on machine and can be accessed by the pod
+  Normal  Created    5m14s  kubelet            spec.containers{postgres}: Container created
+  Normal  Started    5m14s  kubelet            spec.containers{postgres}: Container started
+
