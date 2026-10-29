@@ -41,7 +41,7 @@ worker:
 # managed backups, failover and patching). Disable when pointing at RDS.
 postgres:
   enabled: true
-  image: postgres:17.6-alpine
+  image: postgres:17.11-alpine
   storage: 1Gi
   resources:
     requests: { cpu: 100m, memory: 128Mi }
@@ -50,3 +50,20 @@ postgres:
 ingress:
   className: traefik      # k3d's built-in ingress controller
   host: ""                # empty = any hostname (http://localhost:8080)
+
+# Pod firewall rules - see templates/networkpolicies.yaml
+networkPolicy:
+  enabled: true
+  # Who may reach the frontend: only the ingress controller (Traefik in k3d).
+  # Task 4 adds the Jenkins namespace here for the CD smoke test.
+  frontendSources:
+    - namespaceSelector:
+        matchLabels: { kubernetes.io/metadata.name: kube-system }
+      podSelector:
+        matchLabels: { app.kubernetes.io/name: traefik }
+  # Outbound HTTPS is allowed to the internet (AWS) but NOT to these private
+  # ranges, so a compromised pod can't use port 443 to reach internal services.
+  privateRanges:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16

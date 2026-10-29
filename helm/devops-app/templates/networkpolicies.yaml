@@ -1,0 +1,130 @@
+{{- if .Values.networkPolicy.enabled }}
+# Pod firewall rules. Step 1 blocks ALL traffic in and out of every pod in the
+# namespace; the policies below then allow only the connections the app needs:
+#
+#   ingress controller -> frontend:8080
+#   frontend           -> backend:8000
+#   backend, worker    -> postgres:5432
+#   backend, worker    -> internet :443 only (AWS S3 / SNS APIs)
+#   every pod          -> cluster DNS :53
+#
+# Policies are additive: a connection is allowed if ANY policy allows it.
+
+# --- 1. Default deny (everything not listed below is blocked) --------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+spec:
+  podSelector: {}                 # {} = every pod in this namespace
+  policyTypes: [Ingress, Egress]
+---
+# --- 2. DNS: every pod may look up names (e.g. "backend", "postgres") ------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-dns
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: kube-system }
+          podSelector:
+            matchLabels: { k8s-app: kube-dns }
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+---
+# --- 3. frontend: reachable only from the ingress controller; may call backend ----
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: frontend
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: frontend }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        {{- toYaml .Values.networkPolicy.frontendSources | nindent 8 }}
+      ports:
+        - { protocol: TCP, port: {{ .Values.frontend.port }} }
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: backend }
+      ports:
+        - { protocol: TCP, port: {{ .Values.backend.port }} }
+---
+# --- 4. backend: reachable only from frontend; may call postgres and AWS ---------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: backend }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: frontend }
+      ports:
+        - { protocol: TCP, port: {{ .Values.backend.port }} }
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: postgres }
+      ports:
+        - { protocol: TCP, port: 5432 }
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: {{- toYaml .Values.networkPolicy.privateRanges | nindent 14 }}
+      ports:
+        - { protocol: TCP, port: 443 }   # HTTPS to AWS APIs only
+---
+# --- 5. worker: receives nothing; may call postgres and AWS ----------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: worker
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: worker }
+  policyTypes: [Ingress, Egress]
+  ingress: []                     # no one may connect to the worker
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: postgres }
+      ports:
+        - { protocol: TCP, port: 5432 }
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: {{- toYaml .Values.networkPolicy.privateRanges | nindent 14 }}
+      ports:
+        - { protocol: TCP, port: 443 }
+---
+# --- 6. postgres: reachable only from backend and worker; no outbound at all -----
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/name: postgres }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: backend }
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: worker }
+      ports:
+        - { protocol: TCP, port: 5432 }
+  egress: []                      # the database never initiates connections
+{{- end }}

@@ -1,7 +1,7 @@
 # Project progress – Tasks 3 & 4
 
-**Overall: 11 / 29 done (38%)**
-`[███████████░░░░░░░░░░░░░░░░░░]`
+**Overall: 13 / 29 done (45%)**
+`[█████████████░░░░░░░░░░░░░░░░]`
 
 Plan: ~2–2.5 hours a day. Started Mon Oct 26 · Day 6 = Sat Oct 31 · buffer Sun Nov 1
 
@@ -21,9 +21,9 @@ Plan: ~2–2.5 hours a day. Started Mon Oct 26 · Day 6 = Sat Oct 31 · buffer S
 - [x] **App working at http://localhost:8080** 🎯
 
 ## Day 2 – Tue Oct 27 · Security
-- [ ] NetworkPolicies, plus proof that they block traffic
-- [ ] Trivy image scan + security settings verified
-- [ ] S3 upload + SNS email working *(needs AWS account – fallback: document it)*
+- [x] NetworkPolicies, plus proof that they block traffic (15/15 tests, before/after in `evidence/task3/`)
+- [x] Trivy image scan: 18 CRITICAL → 1 (accepted, documented), frontend fully clean
+- [ ] S3 upload + SNS email working *(⛔ BLOCKED since Oct 29: AWS account closed. Code + Terraform ready; document as blocked)*
 - [ ] Evidence collected with one script
 
 ## Day 3 – Wed Oct 28 · Finish Task 3

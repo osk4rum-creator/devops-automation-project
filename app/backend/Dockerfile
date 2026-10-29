@@ -1,5 +1,5 @@
 # Pinned base image (never :latest) - "slim" keeps the image small
-FROM python:3.12.11-slim
+FROM python:3.12.16-slim
 
 # No .pyc files (root filesystem is read-only in Kubernetes), unbuffered logs
 ENV PYTHONDONTWRITEBYTECODE=1 \

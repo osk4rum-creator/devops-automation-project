@@ -1,6 +1,12 @@
 # Official nginx image variant that runs as non-root (UID 101) on port 8080.
 # Pinned version, never :latest.
-FROM nginxinc/nginx-unprivileged:1.28.0-alpine
+FROM nginxinc/nginx-unprivileged:1.30.6-alpine
+
+# Apply OS security patches released after the base image was built
+# (found by Trivy). Needs root only for this build step.
+USER root
+RUN apk upgrade --no-cache
+USER 101
 
 # NGINX_ENTRYPOINT_LOCAL_RESOLVERS: entrypoint exports the DNS server as
 #   NGINX_LOCAL_RESOLVERS for the "resolver" line in the template.

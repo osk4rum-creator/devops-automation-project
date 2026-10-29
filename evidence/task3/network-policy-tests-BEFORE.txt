@@ -1,0 +1,24 @@
+NetworkPolicy tests - 2026-10-28 13:32
+Cluster: k3d-devops   Namespace: devops-app
+
+--- Entry point
+PASS  internet -> frontend (through Ingress, localhost:8080)     expected ALLOWED got ALLOWED
+PASS  internet -> backend API (through nginx /api/health)        expected ALLOWED got ALLOWED
+--- Pods outside the app may not reach anything
+FAIL  outsider pod -> frontend:8080 (direct, bypassing Ingress)  expected BLOCKED got ALLOWED
+FAIL  outsider pod -> backend:8000                               expected BLOCKED got ALLOWED
+FAIL  outsider pod -> postgres:5432                              expected BLOCKED got ALLOWED
+--- Allowed internal paths
+PASS  frontend -> backend:8000                                   expected ALLOWED got ALLOWED
+PASS  backend  -> postgres:5432                                  expected ALLOWED got ALLOWED
+PASS  worker   -> postgres:5432                                  expected ALLOWED got ALLOWED
+--- Blocked internal paths
+FAIL  frontend -> postgres:5432 (frontend never needs the DB)    expected BLOCKED got ALLOWED
+FAIL  worker   -> backend:8000                                   expected BLOCKED got ALLOWED
+PASS  backend  -> worker (worker accepts no connections)         expected BLOCKED got BLOCKED
+--- Outbound (egress)
+PASS  backend  -> AWS API over HTTPS (sts.amazonaws.com:443)     expected ALLOWED got ALLOWED
+FAIL  backend  -> internet over plain HTTP (port 80)             expected BLOCKED got ALLOWED
+FAIL  postgres -> internet (database makes no outbound calls)    expected BLOCKED got ALLOWED
+
+Result: 7 passed, 7 failed   (saved to evidence/task3/network-policy-tests.txt)
