@@ -236,7 +236,7 @@ Allow rules are added per component – a connection works only if a rule allows
 Exposed outside the cluster: **only the Ingress → frontend**. backend, worker
 and postgres have no route from outside. Proof: [`network-policy-tests.txt`](evidence/task3/network-policy-tests.txt).
 
-> ✍️ **In my own words – why default-deny and blocking frontend → database matter:**
+> **Why this matters:**
 > Default deny and blocking frontend → database matter because they create a dead end
 > for any hacker: even if they get access to the frontend, they can't crawl into the database.
 
@@ -349,7 +349,7 @@ cd terraform && terraform destroy      # AWS resources (when the account is acti
 | 18 CRITICAL vulnerabilities | Base images pinned a year earlier | Updated to the latest patch versions of the same release lines |
 | Scripts could break on Linux | Windows line endings (CRLF) | `.gitattributes` forces LF |
 
-> ✍️ **In my own words – the most useful thing I learned debugging this project:**
+> **Most useful lesson:**
 > I learned that the order things start in matters. After the cluster restarted, the
 > frontend crashed because it started before DNS was ready and couldn't find the backend.
 > Making nginx look up the backend on every request fixed it, so now the frontend
