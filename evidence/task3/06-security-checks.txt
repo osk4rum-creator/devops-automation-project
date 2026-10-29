@@ -1,4 +1,4 @@
-# Container security checks - collected 2026-10-29 10:47
+# Container security checks - collected 2026-10-29 11:07
 
 ## frontend
 $ kubectl exec -n devops-app deploy/frontend -- id
@@ -36,8 +36,8 @@ no Kubernetes API token mounted (expected)
 ## securityContext of every pod
 $ kubectl get pods -n devops-app -o custom-columns=POD:.metadata.name,SA:.spec.serviceAccountName,RUN_AS_USER:.spec.securityContext.runAsUser,NON_ROOT:.spec.securityContext.runAsNonRoot,READ_ONLY_FS:.spec.containers[0].securityContext.readOnlyRootFilesystem,PRIV_ESC:.spec.containers[0].securityContext.allowPrivilegeEscalation,CAPS_DROP:.spec.containers[0].securityContext.capabilities.drop
 POD                         SA         RUN_AS_USER   NON_ROOT   READ_ONLY_FS   PRIV_ESC   CAPS_DROP
-backend-75997d9c94-jwjtw    backend    10001         true       true           false      [ALL]
-backend-75997d9c94-vhxn2    backend    10001         true       true           false      [ALL]
+backend-75997d9c94-bm98c    backend    10001         true       true           false      [ALL]
+backend-75997d9c94-t44sc    backend    10001         true       true           false      [ALL]
 frontend-6b9ddd5d89-4dzzz   frontend   101           true       true           false      [ALL]
 frontend-6b9ddd5d89-dvgmj   frontend   101           true       true           false      [ALL]
 postgres-0                  postgres   70            true       true           false      [ALL]
@@ -45,8 +45,8 @@ worker-59bdf766d5-qnmhq     worker     10001         true       true           f
 
 ## images in use (pinned git-SHA tags, never latest)
 $ kubectl get pods -n devops-app -o jsonpath={range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}
-backend-75997d9c94-jwjtw	devops-app/backend:088d40c
-backend-75997d9c94-vhxn2	devops-app/backend:088d40c
+backend-75997d9c94-bm98c	devops-app/backend:088d40c
+backend-75997d9c94-t44sc	devops-app/backend:088d40c
 frontend-6b9ddd5d89-4dzzz	devops-app/frontend:088d40c
 frontend-6b9ddd5d89-dvgmj	devops-app/frontend:088d40c
 postgres-0	postgres:17.11-alpine

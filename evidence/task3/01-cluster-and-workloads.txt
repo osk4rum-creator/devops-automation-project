@@ -1,4 +1,4 @@
-# Cluster, namespace and workloads - collected 2026-10-29 10:46
+# Cluster, namespace and workloads - collected 2026-10-29 11:06
 
 $ kubectl get nodes -o wide
 NAME                  STATUS   ROLES           AGE    VERSION        INTERNAL-IP   EXTERNAL-IP   OS-IMAGE           KERNEL-VERSION                      CONTAINER-RUNTIME
@@ -15,13 +15,13 @@ kube-public       Active   3d6h
 kube-system       Active   3d6h
 
 $ kubectl get pods -n devops-app -o wide
-NAME                        READY   STATUS    RESTARTS   AGE     IP           NODE                  NOMINATED NODE   READINESS GATES
-backend-75997d9c94-jm9cs    1/1     Running   0          5m14s   10.42.2.35   k3d-devops-server-0   <none>           <none>
-backend-75997d9c94-vgt59    1/1     Running   0          5m14s   10.42.1.44   k3d-devops-agent-1    <none>           <none>
-frontend-6b9ddd5d89-4dzzz   1/1     Running   0          10m     10.42.0.48   k3d-devops-agent-0    <none>           <none>
-frontend-6b9ddd5d89-dvgmj   1/1     Running   0          10m     10.42.1.42   k3d-devops-agent-1    <none>           <none>
-postgres-0                  1/1     Running   0          5m10s   10.42.2.36   k3d-devops-server-0   <none>           <none>
-worker-59bdf766d5-qnmhq     1/1     Running   0          10m     10.42.2.31   k3d-devops-server-0   <none>           <none>
+NAME                        READY   STATUS    RESTARTS   AGE   IP           NODE                  NOMINATED NODE   READINESS GATES
+backend-75997d9c94-jwjtw    1/1     Running   0          19m   10.42.1.45   k3d-devops-agent-1    <none>           <none>
+backend-75997d9c94-vhxn2    1/1     Running   0          19m   10.42.2.38   k3d-devops-server-0   <none>           <none>
+frontend-6b9ddd5d89-4dzzz   1/1     Running   0          30m   10.42.0.48   k3d-devops-agent-0    <none>           <none>
+frontend-6b9ddd5d89-dvgmj   1/1     Running   0          30m   10.42.1.42   k3d-devops-agent-1    <none>           <none>
+postgres-0                  1/1     Running   0          19m   10.42.2.39   k3d-devops-server-0   <none>           <none>
+worker-59bdf766d5-qnmhq     1/1     Running   0          30m   10.42.2.31   k3d-devops-server-0   <none>           <none>
 
 $ kubectl get deployments,statefulsets -n devops-app
 NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
@@ -52,11 +52,11 @@ secret/db-credentials                     Opaque               2      2d20h
 secret/sh.helm.release.v1.devops-app.v1   helm.sh/release.v1   1      2d20h
 secret/sh.helm.release.v1.devops-app.v2   helm.sh/release.v1   1      21h
 secret/sh.helm.release.v1.devops-app.v3   helm.sh/release.v1   1      21h
-secret/sh.helm.release.v1.devops-app.v4   helm.sh/release.v1   1      50m
-secret/sh.helm.release.v1.devops-app.v5   helm.sh/release.v1   1      47m
-secret/sh.helm.release.v1.devops-app.v6   helm.sh/release.v1   1      14m
-secret/sh.helm.release.v1.devops-app.v7   helm.sh/release.v1   1      11m
-secret/sh.helm.release.v1.devops-app.v8   helm.sh/release.v1   1      10m
+secret/sh.helm.release.v1.devops-app.v4   helm.sh/release.v1   1      70m
+secret/sh.helm.release.v1.devops-app.v5   helm.sh/release.v1   1      67m
+secret/sh.helm.release.v1.devops-app.v6   helm.sh/release.v1   1      34m
+secret/sh.helm.release.v1.devops-app.v7   helm.sh/release.v1   1      31m
+secret/sh.helm.release.v1.devops-app.v8   helm.sh/release.v1   1      30m
 
 NAME                      AGE
 serviceaccount/backend    2d20h

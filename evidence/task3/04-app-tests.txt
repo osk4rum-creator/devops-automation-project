@@ -1,4 +1,4 @@
-# Application tests - collected 2026-10-29 10:46
+# Application tests - collected 2026-10-29 11:06
 
 $ curl -s -o /dev/null -w HTTP %{http_code} from the web page through the Ingress\n http://localhost:8080/
 HTTP 200 from the web page through the Ingress
@@ -11,20 +11,20 @@ $ kubectl exec -n devops-app deploy/frontend -- wget -qO- http://backend:8000/he
 {"status":"ok"}
 
 ## write to the database through the API
-$ curl -s -X POST -H Content-Type: application/json -d {"text":"evidence note 10:46:21"} http://localhost:8080/api/notes
-{"id":5,"text":"evidence note 10:46:21"}
+$ curl -s -X POST -H Content-Type: application/json -d {"text":"evidence note 11:06:23"} http://localhost:8080/api/notes
+{"id":6,"text":"evidence note 11:06:23"}
 
 ## read it back through the API
 $ curl -s http://localhost:8080/api/notes
-[{"created_at":"2026-10-29T08:46:22.264669+00:00","id":5,"text":"evidence note 10:46:21"},{"created_at":"2026-10-29T08:40:42.438293+00:00","id":4,"text":"evidence note 10:40:41"},{"created_at":"2026-10-29T08:39:03.040455+00:00","id":3,"text":"evidence note 10:39:02"},{"created_at":"2026-10-28T11:22:36.045016+00:00","id":2,"text":"test"},{"created_at":"2026-10-26T12:11:01.946031+00:00","id":1,"text":"first note from Kubernetes"}]
+[{"created_at":"2026-10-29T09:06:24.003290+00:00","id":6,"text":"evidence note 11:06:23"},{"created_at":"2026-10-29T08:46:22.264669+00:00","id":5,"text":"evidence note 10:46:21"},{"created_at":"2026-10-29T08:40:42.438293+00:00","id":4,"text":"evidence note 10:40:41"},{"created_at":"2026-10-29T08:39:03.040455+00:00","id":3,"text":"evidence note 10:39:02"},{"created_at":"2026-10-28T11:22:36.045016+00:00","id":2,"text":"test"},{"created_at":"2026-10-26T12:11:01.946031+00:00","id":1,"text":"first note from Kubernetes"}]
 
 ## confirm it is stored in PostgreSQL
 $ psql_q SELECT id, text, created_at FROM notes ORDER BY id DESC LIMIT 3;
  id |          text          |          created_at           
 ----+------------------------+-------------------------------
+  6 | evidence note 11:06:23 | 2026-10-29 09:06:24.00329+00
   5 | evidence note 10:46:21 | 2026-10-29 08:46:22.264669+00
   4 | evidence note 10:40:41 | 2026-10-29 08:40:42.438293+00
-  3 | evidence note 10:39:02 | 2026-10-29 08:39:03.040455+00
 (3 rows)
 
 
@@ -33,16 +33,16 @@ $ psql_q INSERT INTO uploads (filename, s3_key) VALUES ('evidence.txt', 'uploads
 INSERT 0 1
 
 $ kubectl logs deploy/worker -n devops-app --tail=3
-2026-10-29 08:41:03,968 ERROR poll failed: connection failed: connection to server at "10.43.172.66", port 5432 failed: Connection refused
 	Is the server running on that host and accepting TCP/IP connections?
 2026-10-29 08:46:24,239 INFO SNS not configured, would send: New file uploaded: evidence.txt (s3:///uploads/evidence.txt)
+2026-10-29 09:06:25,189 INFO SNS not configured, would send: New file uploaded: evidence.txt (s3:///uploads/evidence.txt)
 
 $ psql_q SELECT id, filename, notified FROM uploads ORDER BY id DESC LIMIT 3;
  id |   filename   | notified 
 ----+--------------+----------
+  4 | evidence.txt | t
   3 | evidence.txt | t
   2 | evidence.txt | t
-  1 | evidence.txt | t
 (3 rows)
 
 

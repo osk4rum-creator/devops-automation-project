@@ -1,7 +1,7 @@
 # Project progress – Tasks 3 & 4
 
-**Overall: 14 / 29 done (48%)**
-`[██████████████░░░░░░░░░░░░░░░]`
+**Overall: 15 / 29 done (52%)**
+`[███████████████░░░░░░░░░░░░░░]`
 
 ⚠️ Deadline moved up: **exam on Nov 1**. Compressed plan: Oct 29 finish Task 3 · Oct 30 Jenkins + CI · Oct 31 CD + Task 4 docs · Nov 1 review only.
 
@@ -29,7 +29,7 @@ Plan: ~2–2.5 hours a day. Started Mon Oct 26 · Day 6 = Sat Oct 31 · buffer S
 - [x] Evidence collected with one script (`./scripts/collect-evidence.sh`)
 
 ## Day 3 – Wed Oct 28 · Finish Task 3
-- [ ] README + security chapter + architecture diagram
+- [x] README + security chapter + architecture diagram (incl. your 2 "in my own words" boxes)
 - [ ] Pushed to GitHub, **Task 3 ready to submit** 🎯
 
 ## Day 4 – Thu Oct 29 · Jenkins

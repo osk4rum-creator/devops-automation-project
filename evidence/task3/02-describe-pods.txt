@@ -1,4 +1,4 @@
-# kubectl describe for each component - collected 2026-10-29 10:46
+# kubectl describe for each component - collected 2026-10-29 11:06
 
 $ kubectl describe pod frontend-6b9ddd5d89-4dzzz -n devops-app
 Name:             frontend-6b9ddd5d89-4dzzz
@@ -65,18 +65,18 @@ Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
 Events:
   Type    Reason     Age   From               Message
   ----    ------     ----  ----               -------
-  Normal  Scheduled  10m   default-scheduler  Successfully assigned devops-app/frontend-6b9ddd5d89-4dzzz to k3d-devops-agent-0
-  Normal  Pulled     10m   kubelet            spec.containers{frontend}: Container image "devops-app/frontend:088d40c" already present on machine and can be accessed by the pod
-  Normal  Created    10m   kubelet            spec.containers{frontend}: Container created
-  Normal  Started    10m   kubelet            spec.containers{frontend}: Container started
+  Normal  Scheduled  30m   default-scheduler  Successfully assigned devops-app/frontend-6b9ddd5d89-4dzzz to k3d-devops-agent-0
+  Normal  Pulled     30m   kubelet            spec.containers{frontend}: Container image "devops-app/frontend:088d40c" already present on machine and can be accessed by the pod
+  Normal  Created    30m   kubelet            spec.containers{frontend}: Container created
+  Normal  Started    30m   kubelet            spec.containers{frontend}: Container started
 
-$ kubectl describe pod backend-75997d9c94-jm9cs -n devops-app
-Name:             backend-75997d9c94-jm9cs
+$ kubectl describe pod backend-75997d9c94-jwjtw -n devops-app
+Name:             backend-75997d9c94-jwjtw
 Namespace:        devops-app
 Priority:         0
 Service Account:  backend
-Node:             k3d-devops-server-0/172.19.0.5
-Start Time:       Thu, 29 Oct 2026 10:41:00 +0200
+Node:             k3d-devops-agent-1/172.19.0.4
+Start Time:       Thu, 29 Oct 2026 10:46:39 +0200
 Labels:           app.kubernetes.io/managed-by=Helm
                   app.kubernetes.io/name=backend
                   app.kubernetes.io/part-of=devops-app
@@ -84,19 +84,19 @@ Labels:           app.kubernetes.io/managed-by=Helm
 Annotations:      checksum/config: 48e67e93d11e72b980da65be0500520a707f4c94ea6f6bebc7e716c43eb70ed0
 Status:           Running
 SeccompProfile:   RuntimeDefault
-IP:               10.42.2.35
+IP:               10.42.1.45
 IPs:
-  IP:           10.42.2.35
+  IP:           10.42.1.45
 Controlled By:  ReplicaSet/backend-75997d9c94
 Containers:
   backend:
-    Container ID:   containerd://4cab9010acfa9661949eaf0a41228059b073dcc3cfb2b202434c07dcd45d8eaf
+    Container ID:   containerd://99ea8301320c5b959fef59117ca347402be68b480470f0c6be83634e19fbb913
     Image:          devops-app/backend:088d40c
     Image ID:       sha256:951adf367322d3bfa4ca381d4cee5870840609e0272229df5c7a0bb53d97e2aa
     Port:           8000/TCP (http)
     Host Port:      0/TCP (http)
     State:          Running
-      Started:      Thu, 29 Oct 2026 10:41:00 +0200
+      Started:      Thu, 29 Oct 2026 10:46:40 +0200
     Ready:          True
     Restart Count:  0
     Limits:
@@ -131,13 +131,12 @@ Node-Selectors:  <none>
 Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
                  node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:
-  Type     Reason     Age    From               Message
-  ----     ------     ----   ----               -------
-  Normal   Scheduled  5m18s  default-scheduler  Successfully assigned devops-app/backend-75997d9c94-jm9cs to k3d-devops-server-0
-  Normal   Pulled     5m18s  kubelet            spec.containers{backend}: Container image "devops-app/backend:088d40c" already present on machine and can be accessed by the pod
-  Normal   Created    5m18s  kubelet            spec.containers{backend}: Container created
-  Normal   Started    5m18s  kubelet            spec.containers{backend}: Container started
-  Warning  Unhealthy  5m16s  kubelet            spec.containers{backend}: Readiness probe failed: Get "http://10.42.2.35:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  19m   default-scheduler  Successfully assigned devops-app/backend-75997d9c94-jwjtw to k3d-devops-agent-1
+  Normal  Pulled     19m   kubelet            spec.containers{backend}: Container image "devops-app/backend:088d40c" already present on machine and can be accessed by the pod
+  Normal  Created    19m   kubelet            spec.containers{backend}: Container created
+  Normal  Started    19m   kubelet            spec.containers{backend}: Container started
 
 $ kubectl describe pod worker-59bdf766d5-qnmhq -n devops-app
 Name:             worker-59bdf766d5-qnmhq
@@ -202,10 +201,10 @@ Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
 Events:
   Type    Reason     Age   From               Message
   ----    ------     ----  ----               -------
-  Normal  Scheduled  10m   default-scheduler  Successfully assigned devops-app/worker-59bdf766d5-qnmhq to k3d-devops-server-0
-  Normal  Pulled     10m   kubelet            spec.containers{worker}: Container image "devops-app/worker:088d40c" already present on machine and can be accessed by the pod
-  Normal  Created    10m   kubelet            spec.containers{worker}: Container created
-  Normal  Started    10m   kubelet            spec.containers{worker}: Container started
+  Normal  Scheduled  30m   default-scheduler  Successfully assigned devops-app/worker-59bdf766d5-qnmhq to k3d-devops-server-0
+  Normal  Pulled     30m   kubelet            spec.containers{worker}: Container image "devops-app/worker:088d40c" already present on machine and can be accessed by the pod
+  Normal  Created    30m   kubelet            spec.containers{worker}: Container created
+  Normal  Started    30m   kubelet            spec.containers{worker}: Container started
 
 $ kubectl describe pod postgres-0 -n devops-app
 Name:             postgres-0
@@ -213,7 +212,7 @@ Namespace:        devops-app
 Priority:         0
 Service Account:  postgres
 Node:             k3d-devops-server-0/172.19.0.5
-Start Time:       Thu, 29 Oct 2026 10:41:04 +0200
+Start Time:       Thu, 29 Oct 2026 10:46:47 +0200
 Labels:           app.kubernetes.io/managed-by=Helm
                   app.kubernetes.io/name=postgres
                   app.kubernetes.io/part-of=devops-app
@@ -223,19 +222,19 @@ Labels:           app.kubernetes.io/managed-by=Helm
 Annotations:      <none>
 Status:           Running
 SeccompProfile:   RuntimeDefault
-IP:               10.42.2.36
+IP:               10.42.2.39
 IPs:
-  IP:           10.42.2.36
+  IP:           10.42.2.39
 Controlled By:  StatefulSet/postgres
 Containers:
   postgres:
-    Container ID:   containerd://a433e07597d0262d93d75064f48e14f9810ca3a2ce81413ae804f68ad00289d2
+    Container ID:   containerd://61d227cbd647c3a8c7c1ec6e5af78b3327d00a068c6cff0cb628e5104d71bbaf
     Image:          postgres:17.11-alpine
     Image ID:       docker.io/library/postgres@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
     Port:           5432/TCP (postgres)
     Host Port:      0/TCP (postgres)
     State:          Running
-      Started:      Thu, 29 Oct 2026 10:41:05 +0200
+      Started:      Thu, 29 Oct 2026 10:46:47 +0200
     Ready:          True
     Restart Count:  0
     Limits:
@@ -280,10 +279,10 @@ Node-Selectors:  <none>
 Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
                  node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:
-  Type    Reason     Age    From               Message
-  ----    ------     ----   ----               -------
-  Normal  Scheduled  5m14s  default-scheduler  Successfully assigned devops-app/postgres-0 to k3d-devops-server-0
-  Normal  Pulled     5m14s  kubelet            spec.containers{postgres}: Container image "postgres:17.11-alpine" already present on machine and can be accessed by the pod
-  Normal  Created    5m14s  kubelet            spec.containers{postgres}: Container created
-  Normal  Started    5m14s  kubelet            spec.containers{postgres}: Container started
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  19m   default-scheduler  Successfully assigned devops-app/postgres-0 to k3d-devops-server-0
+  Normal  Pulled     19m   kubelet            spec.containers{postgres}: Container image "postgres:17.11-alpine" already present on machine and can be accessed by the pod
+  Normal  Created    19m   kubelet            spec.containers{postgres}: Container created
+  Normal  Started    19m   kubelet            spec.containers{postgres}: Container started
 
