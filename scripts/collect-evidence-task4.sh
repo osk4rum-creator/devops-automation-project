@@ -29,7 +29,9 @@ for s in d.get('stages', []):
     print(f\"  {s['name']:<22} {s['status']:<9} {s['durationMillis']/1000:6.1f}s\")
 print(f\"  {'TOTAL':<22} {d.get('status',''):<9} {d.get('durationMillis',0)/1000:6.1f}s\")"
 }
-causes() { jenkins_api GET "/job/$1/$2/api/json?tree=actions[causes[shortDescription]]" | grep -o '"shortDescription":"[^"]*"' | cut -d'"' -f4; }
+causes() {  # parsed as JSON: descriptions can contain quotes, e.g. upstream project "application-ci"
+  jenkins_api GET "/job/$1/$2/api/json?tree=actions[causes[shortDescription]]"     | python -c "import sys,json; [print(c['shortDescription']) for a in json.load(sys.stdin)['actions'] for c in a.get('causes',[])]"
+}
 console() { jenkins_api GET "/job/$1/$2/consoleText"; }
 
 # --- 1. Jenkins installation ----------------------------------------------------------

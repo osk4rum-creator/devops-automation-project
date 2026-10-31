@@ -1,5 +1,5 @@
-# Images in GHCR for tag 7977849 (public, anonymous read) - collected 2026-10-31 09:05
+# Images in GHCR for tag f477fca (public, anonymous read) - collected 2026-10-31 09:29
 
-ghcr.io/osk4rum-creator/devops-app/frontend:7977849  ->  sha256:0d79641ca1b20b1ba9fb02b9ddcc53d034ad57df38af6681a7d9125f0b06d279
-ghcr.io/osk4rum-creator/devops-app/backend:7977849  ->  sha256:3e7c2868a81dacc9151a1244059d3051a9bee2ca716b4b51418e429ddee596b5
-ghcr.io/osk4rum-creator/devops-app/worker:7977849  ->  sha256:7658650178da6477e34db06c71a2d85b3646b16f7129b9fac93cbd006ddec659
+ghcr.io/osk4rum-creator/devops-app/frontend:f477fca  ->  sha256:759f0e2bf1f74655c25b8a380151981c683cb8052ee08530a682aff145e0de97
+ghcr.io/osk4rum-creator/devops-app/backend:f477fca  ->  sha256:9c2e2bceb6e389ab656c5b2e4e8aa642a990e42261943615b10b61221941c5b1
+ghcr.io/osk4rum-creator/devops-app/worker:f477fca  ->  sha256:c65ba28420b0022e3517c5b089fcedd156ecf3177b7973e0e6c5940bb37ee7ca

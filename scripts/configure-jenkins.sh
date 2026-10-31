@@ -9,6 +9,7 @@ export MSYS_NO_PATHCONV=1
 cd "$(dirname "$0")/.."
 
 kubectl apply -f jenkins/rbac.yaml
+kubectl apply -f jenkins/networkpolicy.yaml   # who may connect to the controller
 helm upgrade jenkins jenkins/jenkins \
   --version 5.10.2 \
   --namespace jenkins \

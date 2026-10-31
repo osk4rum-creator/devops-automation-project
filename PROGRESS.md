@@ -1,7 +1,7 @@
 # Project progress – Tasks 3 & 4
 
-**Overall: 25 / 29 done (86%)**
-`[█████████████████████████░░░░]`
+**Overall: 28 / 29 done (97%)**
+`[████████████████████████████░]`
 
 ⚠️ **Exam on Nov 1.** Plan: Oct 29 Task 3 + Jenkins install ✅ · Oct 30 CI + CD pipelines · Oct 31 webhook, demos, Task 4 docs · Nov 1 review only.
 
@@ -41,9 +41,10 @@
 - [x] GitHub webhook triggers CI (push → CI #5 → CD #4 fully automatic)
 
 **Oct 31 · Finish Task 4**
-- [ ] Failure demo + rollback demo *(rollback ✅ done – failure demo next)*
-- [ ] Task 4 evidence collected
-- [ ] README + 2 diagrams, **Task 4 ready to submit** 🎯
+- [x] Failure demo (CI #7 stopped at Test, no image, no CD) + rollback demo (helm rollback)
+- [x] Task 4 evidence collected (`./scripts/collect-evidence-task4.sh`) + Jenkins NetworkPolicy
+- [x] README + 2 diagrams (deployment view + pipeline flow) – push + submit Task 4 🎯
+- [x] Exam cheat sheet: `notes/EXAM-CHEATSHEET.md` (private, gitignored)
 
 ---
 

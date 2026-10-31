@@ -31,6 +31,7 @@ kubectl create secret generic jenkins-ghcr -n "$NAMESPACE" \
 
 # --- 3. ServiceAccounts + least-privilege RBAC for the agents -------------------------
 kubectl apply -f jenkins/rbac.yaml
+kubectl apply -f jenkins/networkpolicy.yaml   # who may connect to the controller
 
 # --- 4. Jenkins itself ------------------------------------------------------------------
 helm repo add jenkins https://charts.jenkins.io >/dev/null 2>&1 || true

@@ -1,31 +1,31 @@
-# CD pipeline - application-cd #4 - collected 2026-10-31 09:05
+# CD pipeline - application-cd #6 - collected 2026-10-31 09:29
 
 ## Started by:
-Started by upstream project \
+Started by upstream project "application-ci" build number 8
 
 ## Parameters:
-IMAGE_TAG = 7977849
+IMAGE_TAG = f477fca
 ENVIRONMENT = devops-app
-CI_BUILD = http://jenkins.localhost:8080/job/application-ci/5/
+CI_BUILD = http://jenkins.localhost:8080/job/application-ci/8/
 
 ## Stages:
-  Checkout               SUCCESS      8.2s
-  Validate input         SUCCESS      2.4s
-  Validate manifests     SUCCESS      2.8s
+  Checkout               SUCCESS      7.9s
+  Validate input         SUCCESS      2.0s
+  Validate manifests     SUCCESS      2.7s
   Authenticate           SUCCESS      0.6s
-  Deploy                 SUCCESS     27.1s
-  Rollout                SUCCESS      0.9s
+  Deploy                 SUCCESS     39.4s
+  Rollout                SUCCESS      1.6s
   Verify                 SUCCESS      0.8s
-  Smoke test             SUCCESS      0.6s
-  Declarative: Post Actions SUCCESS      0.1s
-  TOTAL                  SUCCESS     53.4s
+  Smoke test             SUCCESS      0.5s
+  Declarative: Post Actions SUCCESS      0.0s
+  TOTAL                  SUCCESS     62.0s
 
 ## Key log lines:
-  version (image tag): 7977849
+  version (image tag): f477fca
   target cluster:      same cluster Jenkins runs in (k3d-devops)
   target namespace:    devops-app
-  started by:          Started by upstream project "application-ci" build number 5
-  from CI build:       http://jenkins.localhost:8080/job/application-ci/5/
+  started by:          Started by upstream project "application-ci" build number 8
+  from CI build:       http://jenkins.localhost:8080/job/application-ci/8/
 Warning: resource serviceaccounts/frontend is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
 serviceaccount/frontend configured (server dry run)
 Warning: resource serviceaccounts/backend is missing the kubectl.kubernetes.io/last-applied-configuration annotation which is required by kubectl apply. kubectl apply should only be used on resources created declaratively by either kubectl create --save-config or kubectl apply. The missing annotation will be patched automatically.
@@ -37,40 +37,40 @@ serviceaccount/postgres configured (server dry run)
 Username                                            system:serviceaccount:jenkins:jenkins-deployer
 Groups                                              [system:serviceaccounts system:serviceaccounts:jenkins system:authenticated]
 may deploy to devops-app: yes
-LAST DEPLOYED: Sat Oct 31 07:04:07 2026
-REVISION: 11
+LAST DEPLOYED: Sat Oct 31 07:26:12 2026
+REVISION: 14
 deployment "frontend" successfully rolled out
 deployment "backend" successfully rolled out
 deployment "worker" successfully rolled out
-frontend -> ghcr.io/osk4rum-creator/devops-app/frontend:7977849
-backend -> ghcr.io/osk4rum-creator/devops-app/backend:7977849
-worker -> ghcr.io/osk4rum-creator/devops-app/worker:7977849
+frontend -> ghcr.io/osk4rum-creator/devops-app/frontend:f477fca
+backend -> ghcr.io/osk4rum-creator/devops-app/backend:f477fca
+worker -> ghcr.io/osk4rum-creator/devops-app/worker:f477fca
 web page OK
 {"status":"ready"}
-DEPLOYED 7977849 to devops-app (CI build: http://jenkins.localhost:8080/job/application-ci/5/)
+DEPLOYED f477fca to devops-app (CI build: http://jenkins.localhost:8080/job/application-ci/8/)
 Finished: SUCCESS
 
 $ kubectl get deployments,pods,services,ingress -n devops-app
 NAME                       READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/backend    2/2     2            2           4d18h
-deployment.apps/frontend   2/2     2            2           4d18h
-deployment.apps/worker     1/1     1            1           4d18h
+deployment.apps/backend    2/2     2            2           4d19h
+deployment.apps/frontend   2/2     2            2           4d19h
+deployment.apps/worker     1/1     1            1           4d19h
 
-NAME                            READY   STATUS    RESTARTS   AGE
-pod/backend-6d864999dd-ghrzn    1/1     Running   0          70s
-pod/backend-6d864999dd-ttk7d    1/1     Running   0          57s
-pod/frontend-5d9b4cf5dc-44j5q   1/1     Running   0          70s
-pod/frontend-5d9b4cf5dc-dwzkz   1/1     Running   0          66s
-pod/postgres-0                  1/1     Running   0          45h
-pod/worker-d8cb9856c-2gpvh      1/1     Running   0          70s
+NAME                           READY   STATUS    RESTARTS   AGE
+pod/backend-76d6d4d747-5gn4r   1/1     Running   0          3m25s
+pod/backend-76d6d4d747-sxldv   1/1     Running   0          3m39s
+pod/frontend-576ff67b-4pksz    1/1     Running   0          3m34s
+pod/frontend-576ff67b-8dgqq    1/1     Running   0          3m39s
+pod/postgres-0                 1/1     Running   0          46h
+pod/worker-74fdd885fd-xmhp8    1/1     Running   0          3m39s
 
 NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
-service/backend    ClusterIP   10.43.42.245    <none>        8000/TCP   4d18h
-service/frontend   ClusterIP   10.43.218.194   <none>        80/TCP     4d18h
-service/postgres   ClusterIP   10.43.172.66    <none>        5432/TCP   4d18h
+service/backend    ClusterIP   10.43.42.245    <none>        8000/TCP   4d19h
+service/frontend   ClusterIP   10.43.218.194   <none>        80/TCP     4d19h
+service/postgres   ClusterIP   10.43.172.66    <none>        5432/TCP   4d19h
 
 NAME                                 CLASS     HOSTS   ADDRESS                            PORTS   AGE
-ingress.networking.k8s.io/frontend   traefik   *       172.19.0.2,172.19.0.4,172.19.0.5   80      4d18h
+ingress.networking.k8s.io/frontend   traefik   *       172.19.0.2,172.19.0.4,172.19.0.5   80      4d19h
 
 $ kubectl rollout status deployment/frontend -n devops-app
 deployment "frontend" successfully rolled out
@@ -82,196 +82,342 @@ $ kubectl rollout status deployment/worker -n devops-app
 deployment "worker" successfully rolled out
 
 $ kubectl get pods -n devops-app -o jsonpath={range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}
-backend-6d864999dd-ghrzn	ghcr.io/osk4rum-creator/devops-app/backend:7977849
-backend-6d864999dd-ttk7d	ghcr.io/osk4rum-creator/devops-app/backend:7977849
-frontend-5d9b4cf5dc-44j5q	ghcr.io/osk4rum-creator/devops-app/frontend:7977849
-frontend-5d9b4cf5dc-dwzkz	ghcr.io/osk4rum-creator/devops-app/frontend:7977849
+backend-76d6d4d747-5gn4r	ghcr.io/osk4rum-creator/devops-app/backend:f477fca
+backend-76d6d4d747-sxldv	ghcr.io/osk4rum-creator/devops-app/backend:f477fca
+frontend-576ff67b-4pksz	ghcr.io/osk4rum-creator/devops-app/frontend:f477fca
+frontend-576ff67b-8dgqq	ghcr.io/osk4rum-creator/devops-app/frontend:f477fca
 postgres-0	postgres:17.11-alpine
-worker-d8cb9856c-2gpvh	ghcr.io/osk4rum-creator/devops-app/worker:7977849
+worker-74fdd885fd-xmhp8	ghcr.io/osk4rum-creator/devops-app/worker:f477fca
 
 $ kubectl get events -n devops-app --sort-by=.metadata.creationTimestamp
 LAST SEEN   TYPE      REASON              OBJECT                           MESSAGE
-32m         Warning   Unhealthy           pod/backend-75997d9c94-t44sc     Readiness probe failed: Get "http://10.42.1.46:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
-32m         Warning   Unhealthy           pod/backend-75997d9c94-bm98c     Readiness probe failed: Get "http://10.42.2.41:8000/readyz": dial tcp 10.42.2.41:8000: connect: connection refused
-32m         Normal    SuccessfulCreate    replicaset/frontend-9584598b6    Created pod: frontend-9584598b6-vblm5
-32m         Normal    ScalingReplicaSet   deployment/worker                Scaled up replica set worker-679f859d64 from 0 to 1
-32m         Normal    SuccessfulCreate    replicaset/worker-679f859d64     Created pod: worker-679f859d64-fkkr8
-32m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-6fc5cf494f from 0 to 1
-32m         Normal    Scheduled           pod/backend-6fc5cf494f-ghnft     Successfully assigned devops-app/backend-6fc5cf494f-ghnft to k3d-devops-server-0
-32m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-9584598b6 from 0 to 1
-32m         Normal    Scheduled           pod/worker-679f859d64-fkkr8      Successfully assigned devops-app/worker-679f859d64-fkkr8 to k3d-devops-server-0
-32m         Normal    Scheduled           pod/frontend-9584598b6-vblm5     Successfully assigned devops-app/frontend-9584598b6-vblm5 to k3d-devops-server-0
-32m         Normal    SuccessfulCreate    replicaset/backend-6fc5cf494f    Created pod: backend-6fc5cf494f-ghnft
-32m         Normal    Pulling             pod/worker-679f859d64-fkkr8      Pulling image "ghcr.io/osk4rum-creator/devops-app/worker:fccdee2"
-32m         Normal    Pulling             pod/frontend-9584598b6-vblm5     Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:fccdee2"
-32m         Normal    Pulling             pod/backend-6fc5cf494f-ghnft     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:fccdee2"
-32m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-9584598b6 from 1 to 2
-32m         Normal    Scheduled           pod/frontend-9584598b6-k5zch     Successfully assigned devops-app/frontend-9584598b6-k5zch to k3d-devops-agent-1
-32m         Normal    Created             pod/frontend-9584598b6-vblm5     Container created
-32m         Normal    Started             pod/frontend-9584598b6-vblm5     Container started
-32m         Normal    Pulled              pod/frontend-9584598b6-vblm5     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:fccdee2" in 3.037s (3.037s including waiting). Image size: 27462873 bytes.
-32m         Normal    Killing             pod/frontend-6b9ddd5d89-4dzzz    Stopping container frontend
-32m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-6b9ddd5d89 from 2 to 1
-32m         Normal    SuccessfulCreate    replicaset/frontend-9584598b6    Created pod: frontend-9584598b6-k5zch
-32m         Normal    SuccessfulDelete    replicaset/frontend-6b9ddd5d89   Deleted pod: frontend-6b9ddd5d89-4dzzz
-32m         Normal    Pulling             pod/frontend-9584598b6-k5zch     Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:fccdee2"
-32m         Normal    Started             pod/backend-6fc5cf494f-ghnft     Container started
-32m         Normal    Pulled              pod/backend-6fc5cf494f-ghnft     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:fccdee2" in 6.488s (6.488s including waiting). Image size: 66267225 bytes.
-32m         Normal    Created             pod/backend-6fc5cf494f-ghnft     Container created
-32m         Normal    Started             pod/frontend-9584598b6-k5zch     Container started
-32m         Warning   Unhealthy           pod/backend-6fc5cf494f-ghnft     Readiness probe failed: Get "http://10.42.2.48:8000/readyz": dial tcp 10.42.2.48:8000: connect: connection refused
-32m         Normal    Created             pod/frontend-9584598b6-k5zch     Container created
-32m         Normal    Pulled              pod/frontend-9584598b6-k5zch     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:fccdee2" in 2.501s (2.501s including waiting). Image size: 27462873 bytes.
-32m         Normal    Started             pod/worker-679f859d64-fkkr8      Container started
-32m         Normal    SuccessfulDelete    replicaset/frontend-6b9ddd5d89   Deleted pod: frontend-6b9ddd5d89-dvgmj
-32m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-6b9ddd5d89 from 1 to 0
-32m         Normal    Created             pod/worker-679f859d64-fkkr8      Container created
-32m         Normal    Pulled              pod/worker-679f859d64-fkkr8      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/worker:fccdee2" in 7.882s (7.882s including waiting). Image size: 64120874 bytes.
-32m         Normal    Killing             pod/frontend-6b9ddd5d89-dvgmj    Stopping container frontend
-32m         Normal    Scheduled           pod/backend-6fc5cf494f-q66wf     Successfully assigned devops-app/backend-6fc5cf494f-q66wf to k3d-devops-agent-1
-32m         Normal    Killing             pod/backend-75997d9c94-bm98c     Stopping container backend
-32m         Normal    SuccessfulDelete    replicaset/backend-75997d9c94    Deleted pod: backend-75997d9c94-bm98c
-32m         Normal    SuccessfulCreate    replicaset/backend-6fc5cf494f    Created pod: backend-6fc5cf494f-q66wf
-32m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-6fc5cf494f from 1 to 2
-32m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-75997d9c94 from 2 to 1
-32m         Warning   Unhealthy           pod/backend-6fc5cf494f-ghnft     Readiness probe failed: Get "http://10.42.2.48:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
-32m         Normal    Pulling             pod/backend-6fc5cf494f-q66wf     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:fccdee2"
-32m         Normal    Started             pod/backend-6fc5cf494f-q66wf     Container started
-32m         Normal    Created             pod/backend-6fc5cf494f-q66wf     Container created
-32m         Normal    Pulled              pod/backend-6fc5cf494f-q66wf     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:fccdee2" in 5.395s (5.395s including waiting). Image size: 66267225 bytes.
-32m         Warning   Unhealthy           pod/backend-6fc5cf494f-q66wf     Readiness probe failed: Get "http://10.42.1.51:8000/readyz": dial tcp 10.42.1.51:8000: connect: connection refused
-32m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-75997d9c94 from 1 to 0
-32m         Normal    SuccessfulDelete    replicaset/backend-75997d9c94    Deleted pod: backend-75997d9c94-t44sc
-32m         Normal    Killing             pod/backend-75997d9c94-t44sc     Stopping container backend
-32m         Normal    SuccessfulDelete    replicaset/worker-59bdf766d5     Deleted pod: worker-59bdf766d5-qnmhq
-32m         Normal    Killing             pod/worker-59bdf766d5-qnmhq      Stopping container worker
-32m         Normal    ScalingReplicaSet   deployment/worker                Scaled down replica set worker-59bdf766d5 from 1 to 0
-31m         Warning   Unhealthy           pod/worker-59bdf766d5-qnmhq      Readiness probe errored and resulted in unknown state: rpc error: code = Canceled desc = context canceled
-22m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-c785795d9 from 0 to 1
-22m         Normal    SuccessfulCreate    replicaset/frontend-5ddc45565d   Created pod: frontend-5ddc45565d-v5mxk
-22m         Normal    Scheduled           pod/worker-5f6d4857bd-4ghfs      Successfully assigned devops-app/worker-5f6d4857bd-4ghfs to k3d-devops-agent-1
-22m         Normal    Scheduled           pod/frontend-5ddc45565d-v5mxk    Successfully assigned devops-app/frontend-5ddc45565d-v5mxk to k3d-devops-agent-1
-22m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-5ddc45565d from 0 to 1
-22m         Normal    Pulling             pod/worker-5f6d4857bd-4ghfs      Pulling image "ghcr.io/osk4rum-creator/devops-app/worker:6af8bef"
-22m         Normal    Scheduled           pod/backend-c785795d9-wl6w2      Successfully assigned devops-app/backend-c785795d9-wl6w2 to k3d-devops-agent-1
-22m         Normal    Pulling             pod/backend-c785795d9-wl6w2      Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:6af8bef"
-22m         Normal    SuccessfulCreate    replicaset/backend-c785795d9     Created pod: backend-c785795d9-wl6w2
-22m         Normal    ScalingReplicaSet   deployment/worker                Scaled up replica set worker-5f6d4857bd from 0 to 1
-22m         Normal    SuccessfulCreate    replicaset/worker-5f6d4857bd     Created pod: worker-5f6d4857bd-4ghfs
-22m         Normal    Pulling             pod/frontend-5ddc45565d-v5mxk    Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef"
-22m         Normal    Created             pod/frontend-5ddc45565d-v5mxk    Container created
-22m         Normal    Pulled              pod/frontend-5ddc45565d-v5mxk    Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef" in 3.044s (3.044s including waiting). Image size: 27462876 bytes.
-22m         Warning   Unhealthy           pod/frontend-5ddc45565d-v5mxk    Readiness probe failed: Get "http://10.42.1.55:8080/healthz": dial tcp 10.42.1.55:8080: connect: connection refused
-22m         Normal    Started             pod/frontend-5ddc45565d-v5mxk    Container started
-22m         Normal    SuccessfulDelete    replicaset/frontend-9584598b6    Deleted pod: frontend-9584598b6-k5zch
-22m         Normal    Killing             pod/frontend-9584598b6-k5zch     Stopping container frontend
-22m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-5ddc45565d from 1 to 2
-22m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-9584598b6 from 2 to 1
-22m         Normal    SuccessfulCreate    replicaset/frontend-5ddc45565d   Created pod: frontend-5ddc45565d-sh5q5
-22m         Normal    Scheduled           pod/frontend-5ddc45565d-sh5q5    Successfully assigned devops-app/frontend-5ddc45565d-sh5q5 to k3d-devops-server-0
-22m         Normal    Pulling             pod/frontend-5ddc45565d-sh5q5    Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef"
-22m         Normal    Started             pod/backend-c785795d9-wl6w2      Container started
-22m         Normal    Created             pod/backend-c785795d9-wl6w2      Container created
-22m         Normal    Pulled              pod/backend-c785795d9-wl6w2      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:6af8bef" in 8.055s (8.055s including waiting). Image size: 66267371 bytes.
-22m         Normal    Pulled              pod/frontend-5ddc45565d-sh5q5    Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef" in 2.131s (2.132s including waiting). Image size: 27462876 bytes.
-22m         Normal    Created             pod/frontend-5ddc45565d-sh5q5    Container created
-22m         Normal    Started             pod/frontend-5ddc45565d-sh5q5    Container started
-22m         Normal    Created             pod/worker-5f6d4857bd-4ghfs      Container created
-22m         Normal    Pulled              pod/worker-5f6d4857bd-4ghfs      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/worker:6af8bef" in 8.151s (8.151s including waiting). Image size: 64120922 bytes.
-22m         Normal    Killing             pod/frontend-9584598b6-vblm5     Stopping container frontend
-22m         Normal    SuccessfulDelete    replicaset/frontend-9584598b6    Deleted pod: frontend-9584598b6-vblm5
-22m         Normal    Started             pod/worker-5f6d4857bd-4ghfs      Container started
-22m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-9584598b6 from 1 to 0
-22m         Warning   Unhealthy           pod/backend-c785795d9-wl6w2      Readiness probe failed: Get "http://10.42.1.53:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
-22m         Normal    Scheduled           pod/backend-c785795d9-hbhp7      Successfully assigned devops-app/backend-c785795d9-hbhp7 to k3d-devops-server-0
-22m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-c785795d9 from 1 to 2
-22m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-6fc5cf494f from 2 to 1
-22m         Normal    Pulling             pod/backend-c785795d9-hbhp7      Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:6af8bef"
-22m         Normal    SuccessfulCreate    replicaset/backend-c785795d9     Created pod: backend-c785795d9-hbhp7
-22m         Normal    Killing             pod/backend-6fc5cf494f-q66wf     Stopping container backend
-22m         Warning   Unhealthy           pod/backend-6fc5cf494f-q66wf     Readiness probe failed: Get "http://10.42.1.51:8000/readyz": read tcp 10.42.1.1:44594->10.42.1.51:8000: read: connection reset by peer
-22m         Normal    SuccessfulDelete    replicaset/backend-6fc5cf494f    Deleted pod: backend-6fc5cf494f-q66wf
-22m         Normal    Pulled              pod/backend-c785795d9-hbhp7      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:6af8bef" in 4.761s (4.761s including waiting). Image size: 66267371 bytes.
-22m         Normal    Started             pod/backend-c785795d9-hbhp7      Container started
-58s         Warning   Unhealthy           pod/backend-c785795d9-hbhp7      Readiness probe failed: Get "http://10.42.2.54:8000/readyz": dial tcp 10.42.2.54:8000: connect: connection refused
-22m         Normal    Created             pod/backend-c785795d9-hbhp7      Container created
-22m         Warning   Unhealthy           pod/backend-c785795d9-hbhp7      Readiness probe failed: Get "http://10.42.2.54:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
-22m         Normal    Killing             pod/backend-6fc5cf494f-ghnft     Stopping container backend
-22m         Normal    SuccessfulDelete    replicaset/backend-6fc5cf494f    Deleted pod: backend-6fc5cf494f-ghnft
-22m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-6fc5cf494f from 1 to 0
-22m         Normal    SuccessfulDelete    replicaset/worker-679f859d64     Deleted pod: worker-679f859d64-fkkr8
-22m         Normal    Killing             pod/worker-679f859d64-fkkr8      Stopping container worker
-22m         Normal    ScalingReplicaSet   deployment/worker                Scaled down replica set worker-679f859d64 from 1 to 0
-22m         Warning   Unhealthy           pod/worker-679f859d64-fkkr8      Readiness probe errored and resulted in unknown state: rpc error: code = Canceled desc = context canceled
-71s         Normal    SuccessfulCreate    replicaset/backend-6d864999dd    Created pod: backend-6d864999dd-ghrzn
-71s         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-6d864999dd from 0 to 1
-71s         Normal    Scheduled           pod/backend-6d864999dd-ghrzn     Successfully assigned devops-app/backend-6d864999dd-ghrzn to k3d-devops-server-0
-71s         Normal    ScalingReplicaSet   deployment/worker                Scaled up replica set worker-d8cb9856c from 0 to 1
-71s         Normal    Pulling             pod/backend-6d864999dd-ghrzn     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:7977849"
-71s         Normal    Scheduled           pod/frontend-5d9b4cf5dc-44j5q    Successfully assigned devops-app/frontend-5d9b4cf5dc-44j5q to k3d-devops-server-0
-71s         Normal    Pulling             pod/frontend-5d9b4cf5dc-44j5q    Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:7977849"
-71s         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-5d9b4cf5dc from 0 to 1
-71s         Normal    SuccessfulCreate    replicaset/worker-d8cb9856c      Created pod: worker-d8cb9856c-2gpvh
-71s         Normal    Pulling             pod/worker-d8cb9856c-2gpvh       Pulling image "ghcr.io/osk4rum-creator/devops-app/worker:7977849"
-71s         Normal    Scheduled           pod/worker-d8cb9856c-2gpvh       Successfully assigned devops-app/worker-d8cb9856c-2gpvh to k3d-devops-server-0
-71s         Normal    SuccessfulCreate    replicaset/frontend-5d9b4cf5dc   Created pod: frontend-5d9b4cf5dc-44j5q
-68s         Normal    Created             pod/frontend-5d9b4cf5dc-44j5q    Container created
-68s         Normal    Pulled              pod/frontend-5d9b4cf5dc-44j5q    Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:7977849" in 2.949s (2.949s including waiting). Image size: 27462864 bytes.
-68s         Normal    Started             pod/frontend-5d9b4cf5dc-44j5q    Container started
-67s         Normal    Pulling             pod/frontend-5d9b4cf5dc-dwzkz    Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:7977849"
-67s         Normal    SuccessfulDelete    replicaset/frontend-5ddc45565d   Deleted pod: frontend-5ddc45565d-sh5q5
-67s         Normal    SuccessfulCreate    replicaset/frontend-5d9b4cf5dc   Created pod: frontend-5d9b4cf5dc-dwzkz
-67s         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-5ddc45565d from 2 to 1
-67s         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-5d9b4cf5dc from 1 to 2
-67s         Normal    Scheduled           pod/frontend-5d9b4cf5dc-dwzkz    Successfully assigned devops-app/frontend-5d9b4cf5dc-dwzkz to k3d-devops-agent-1
-67s         Normal    Killing             pod/frontend-5ddc45565d-sh5q5    Stopping container frontend
-65s         Normal    Started             pod/backend-6d864999dd-ghrzn     Container started
-65s         Normal    Pulled              pod/backend-6d864999dd-ghrzn     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:7977849" in 6.032s (6.032s including waiting). Image size: 66267364 bytes.
-65s         Normal    Created             pod/backend-6d864999dd-ghrzn     Container created
-64s         Normal    Started             pod/frontend-5d9b4cf5dc-dwzkz    Container started
-64s         Normal    Created             pod/worker-d8cb9856c-2gpvh       Container created
-64s         Normal    Pulled              pod/worker-d8cb9856c-2gpvh       Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/worker:7977849" in 6.871s (6.871s including waiting). Image size: 64120923 bytes.
-64s         Normal    Started             pod/worker-d8cb9856c-2gpvh       Container started
-64s         Normal    Created             pod/frontend-5d9b4cf5dc-dwzkz    Container created
-64s         Normal    Pulled              pod/frontend-5d9b4cf5dc-dwzkz    Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:7977849" in 2.232s (2.232s including waiting). Image size: 27462864 bytes.
-64s         Warning   Unhealthy           pod/backend-6d864999dd-ghrzn     Readiness probe failed: Get "http://10.42.2.58:8000/readyz": dial tcp 10.42.2.58:8000: connect: connection refused
-63s         Normal    SuccessfulDelete    replicaset/frontend-5ddc45565d   Deleted pod: frontend-5ddc45565d-v5mxk
-63s         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-5ddc45565d from 1 to 0
-63s         Normal    Killing             pod/frontend-5ddc45565d-v5mxk    Stopping container frontend
-62s         Warning   Unhealthy           pod/backend-6d864999dd-ghrzn     Readiness probe failed: Get "http://10.42.2.58:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
-58s         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-6d864999dd from 1 to 2
-58s         Normal    SuccessfulCreate    replicaset/backend-6d864999dd    Created pod: backend-6d864999dd-ttk7d
-58s         Normal    Pulling             pod/backend-6d864999dd-ttk7d     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:7977849"
-58s         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-c785795d9 from 2 to 1
-58s         Normal    SuccessfulDelete    replicaset/backend-c785795d9     Deleted pod: backend-c785795d9-hbhp7
-58s         Normal    Scheduled           pod/backend-6d864999dd-ttk7d     Successfully assigned devops-app/backend-6d864999dd-ttk7d to k3d-devops-agent-1
-58s         Normal    Killing             pod/backend-c785795d9-hbhp7      Stopping container backend
-51s         Normal    Created             pod/backend-6d864999dd-ttk7d     Container created
-51s         Normal    Started             pod/backend-6d864999dd-ttk7d     Container started
-51s         Normal    Killing             pod/worker-5f6d4857bd-4ghfs      Stopping container worker
-51s         Normal    SuccessfulDelete    replicaset/worker-5f6d4857bd     Deleted pod: worker-5f6d4857bd-4ghfs
-51s         Normal    Pulled              pod/backend-6d864999dd-ttk7d     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:7977849" in 6.17s (6.17s including waiting). Image size: 66267364 bytes.
-51s         Normal    ScalingReplicaSet   deployment/worker                Scaled down replica set worker-5f6d4857bd from 1 to 0
-49s         Warning   Unhealthy           pod/backend-6d864999dd-ttk7d     Readiness probe failed: Get "http://10.42.1.61:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
-49s         Normal    Killing             pod/backend-c785795d9-wl6w2      Stopping container backend
-49s         Normal    SuccessfulDelete    replicaset/backend-c785795d9     Deleted pod: backend-c785795d9-wl6w2
-49s         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-c785795d9 from 1 to 0
-26s         Warning   Unhealthy           pod/worker-5f6d4857bd-4ghfs      Readiness probe errored and resulted in unknown state: rpc error: code = Canceled desc = context canceled
+56m         Warning   Unhealthy           pod/backend-75997d9c94-t44sc     Readiness probe failed: Get "http://10.42.1.46:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+56m         Warning   Unhealthy           pod/backend-75997d9c94-bm98c     Readiness probe failed: Get "http://10.42.2.41:8000/readyz": dial tcp 10.42.2.41:8000: connect: connection refused
+57m         Normal    SuccessfulCreate    replicaset/backend-6fc5cf494f    Created pod: backend-6fc5cf494f-ghnft
+57m         Normal    Scheduled           pod/frontend-9584598b6-vblm5     Successfully assigned devops-app/frontend-9584598b6-vblm5 to k3d-devops-server-0
+57m         Normal    ScalingReplicaSet   deployment/worker                Scaled up replica set worker-679f859d64 from 0 to 1
+57m         Normal    SuccessfulCreate    replicaset/frontend-9584598b6    Created pod: frontend-9584598b6-vblm5
+57m         Normal    Scheduled           pod/backend-6fc5cf494f-ghnft     Successfully assigned devops-app/backend-6fc5cf494f-ghnft to k3d-devops-server-0
+57m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-9584598b6 from 0 to 1
+57m         Normal    Scheduled           pod/worker-679f859d64-fkkr8      Successfully assigned devops-app/worker-679f859d64-fkkr8 to k3d-devops-server-0
+57m         Normal    SuccessfulCreate    replicaset/worker-679f859d64     Created pod: worker-679f859d64-fkkr8
+57m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-6fc5cf494f from 0 to 1
+57m         Normal    Pulling             pod/worker-679f859d64-fkkr8      Pulling image "ghcr.io/osk4rum-creator/devops-app/worker:fccdee2"
+57m         Normal    Pulling             pod/frontend-9584598b6-vblm5     Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:fccdee2"
+57m         Normal    Pulling             pod/backend-6fc5cf494f-ghnft     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:fccdee2"
+57m         Normal    Pulled              pod/frontend-9584598b6-vblm5     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:fccdee2" in 3.037s (3.037s including waiting). Image size: 27462873 bytes.
+57m         Normal    Created             pod/frontend-9584598b6-vblm5     Container created
+57m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-9584598b6 from 1 to 2
+57m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-6b9ddd5d89 from 2 to 1
+57m         Normal    Killing             pod/frontend-6b9ddd5d89-4dzzz    Stopping container frontend
+57m         Normal    Scheduled           pod/frontend-9584598b6-k5zch     Successfully assigned devops-app/frontend-9584598b6-k5zch to k3d-devops-agent-1
+57m         Normal    SuccessfulDelete    replicaset/frontend-6b9ddd5d89   Deleted pod: frontend-6b9ddd5d89-4dzzz
+57m         Normal    SuccessfulCreate    replicaset/frontend-9584598b6    Created pod: frontend-9584598b6-k5zch
+57m         Normal    Started             pod/frontend-9584598b6-vblm5     Container started
+57m         Normal    Pulling             pod/frontend-9584598b6-k5zch     Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:fccdee2"
+57m         Normal    Pulled              pod/backend-6fc5cf494f-ghnft     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:fccdee2" in 6.488s (6.488s including waiting). Image size: 66267225 bytes.
+57m         Normal    Created             pod/backend-6fc5cf494f-ghnft     Container created
+57m         Normal    Started             pod/backend-6fc5cf494f-ghnft     Container started
+57m         Normal    Created             pod/frontend-9584598b6-k5zch     Container created
+57m         Normal    Started             pod/frontend-9584598b6-k5zch     Container started
+57m         Warning   Unhealthy           pod/backend-6fc5cf494f-ghnft     Readiness probe failed: Get "http://10.42.2.48:8000/readyz": dial tcp 10.42.2.48:8000: connect: connection refused
+57m         Normal    Pulled              pod/frontend-9584598b6-k5zch     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:fccdee2" in 2.501s (2.501s including waiting). Image size: 27462873 bytes.
+57m         Normal    Pulled              pod/worker-679f859d64-fkkr8      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/worker:fccdee2" in 7.882s (7.882s including waiting). Image size: 64120874 bytes.
+57m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-6b9ddd5d89 from 1 to 0
+57m         Normal    SuccessfulDelete    replicaset/frontend-6b9ddd5d89   Deleted pod: frontend-6b9ddd5d89-dvgmj
+57m         Normal    Started             pod/worker-679f859d64-fkkr8      Container started
+57m         Normal    Killing             pod/frontend-6b9ddd5d89-dvgmj    Stopping container frontend
+57m         Normal    Created             pod/worker-679f859d64-fkkr8      Container created
+57m         Normal    SuccessfulDelete    replicaset/backend-75997d9c94    Deleted pod: backend-75997d9c94-bm98c
+57m         Normal    Killing             pod/backend-75997d9c94-bm98c     Stopping container backend
+57m         Normal    SuccessfulCreate    replicaset/backend-6fc5cf494f    Created pod: backend-6fc5cf494f-q66wf
+57m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-75997d9c94 from 2 to 1
+57m         Normal    Scheduled           pod/backend-6fc5cf494f-q66wf     Successfully assigned devops-app/backend-6fc5cf494f-q66wf to k3d-devops-agent-1
+57m         Warning   Unhealthy           pod/backend-6fc5cf494f-ghnft     Readiness probe failed: Get "http://10.42.2.48:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+57m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-6fc5cf494f from 1 to 2
+57m         Normal    Pulling             pod/backend-6fc5cf494f-q66wf     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:fccdee2"
+56m         Normal    Created             pod/backend-6fc5cf494f-q66wf     Container created
+56m         Normal    Pulled              pod/backend-6fc5cf494f-q66wf     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:fccdee2" in 5.395s (5.395s including waiting). Image size: 66267225 bytes.
+56m         Normal    Started             pod/backend-6fc5cf494f-q66wf     Container started
+56m         Warning   Unhealthy           pod/backend-6fc5cf494f-q66wf     Readiness probe failed: Get "http://10.42.1.51:8000/readyz": dial tcp 10.42.1.51:8000: connect: connection refused
+56m         Normal    Killing             pod/backend-75997d9c94-t44sc     Stopping container backend
+56m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-75997d9c94 from 1 to 0
+56m         Normal    SuccessfulDelete    replicaset/backend-75997d9c94    Deleted pod: backend-75997d9c94-t44sc
+56m         Normal    ScalingReplicaSet   deployment/worker                Scaled down replica set worker-59bdf766d5 from 1 to 0
+56m         Normal    SuccessfulDelete    replicaset/worker-59bdf766d5     Deleted pod: worker-59bdf766d5-qnmhq
+56m         Normal    Killing             pod/worker-59bdf766d5-qnmhq      Stopping container worker
+56m         Warning   Unhealthy           pod/worker-59bdf766d5-qnmhq      Readiness probe errored and resulted in unknown state: rpc error: code = Canceled desc = context canceled
+47m         Normal    SuccessfulCreate    replicaset/frontend-5ddc45565d   Created pod: frontend-5ddc45565d-v5mxk
+47m         Normal    Pulling             pod/backend-c785795d9-wl6w2      Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:6af8bef"
+47m         Normal    Pulling             pod/worker-5f6d4857bd-4ghfs      Pulling image "ghcr.io/osk4rum-creator/devops-app/worker:6af8bef"
+24m         Normal    ScalingReplicaSet   deployment/worker                Scaled up replica set worker-5f6d4857bd from 0 to 1
+24m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-c785795d9 from 0 to 1
+47m         Normal    Scheduled           pod/backend-c785795d9-wl6w2      Successfully assigned devops-app/backend-c785795d9-wl6w2 to k3d-devops-agent-1
+47m         Normal    SuccessfulCreate    replicaset/backend-c785795d9     Created pod: backend-c785795d9-wl6w2
+47m         Normal    SuccessfulCreate    replicaset/worker-5f6d4857bd     Created pod: worker-5f6d4857bd-4ghfs
+24m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-5ddc45565d from 0 to 1
+47m         Normal    Scheduled           pod/worker-5f6d4857bd-4ghfs      Successfully assigned devops-app/worker-5f6d4857bd-4ghfs to k3d-devops-agent-1
+47m         Normal    Scheduled           pod/frontend-5ddc45565d-v5mxk    Successfully assigned devops-app/frontend-5ddc45565d-v5mxk to k3d-devops-agent-1
+47m         Normal    Pulling             pod/frontend-5ddc45565d-v5mxk    Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef"
+47m         Normal    Created             pod/frontend-5ddc45565d-v5mxk    Container created
+47m         Normal    Pulled              pod/frontend-5ddc45565d-v5mxk    Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef" in 3.044s (3.044s including waiting). Image size: 27462876 bytes.
+47m         Normal    Started             pod/frontend-5ddc45565d-v5mxk    Container started
+47m         Warning   Unhealthy           pod/frontend-5ddc45565d-v5mxk    Readiness probe failed: Get "http://10.42.1.55:8080/healthz": dial tcp 10.42.1.55:8080: connect: connection refused
+47m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-9584598b6 from 2 to 1
+24m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-5ddc45565d from 1 to 2
+47m         Normal    SuccessfulDelete    replicaset/frontend-9584598b6    Deleted pod: frontend-9584598b6-k5zch
+47m         Normal    Killing             pod/frontend-9584598b6-k5zch     Stopping container frontend
+47m         Normal    SuccessfulCreate    replicaset/frontend-5ddc45565d   Created pod: frontend-5ddc45565d-sh5q5
+47m         Normal    Scheduled           pod/frontend-5ddc45565d-sh5q5    Successfully assigned devops-app/frontend-5ddc45565d-sh5q5 to k3d-devops-server-0
+47m         Normal    Pulling             pod/frontend-5ddc45565d-sh5q5    Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef"
+47m         Normal    Created             pod/backend-c785795d9-wl6w2      Container created
+47m         Normal    Created             pod/worker-5f6d4857bd-4ghfs      Container created
+47m         Normal    Started             pod/backend-c785795d9-wl6w2      Container started
+47m         Normal    Pulled              pod/backend-c785795d9-wl6w2      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:6af8bef" in 8.055s (8.055s including waiting). Image size: 66267371 bytes.
+47m         Normal    Pulled              pod/worker-5f6d4857bd-4ghfs      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/worker:6af8bef" in 8.151s (8.151s including waiting). Image size: 64120922 bytes.
+47m         Normal    Started             pod/frontend-5ddc45565d-sh5q5    Container started
+47m         Normal    Created             pod/frontend-5ddc45565d-sh5q5    Container created
+47m         Normal    Pulled              pod/frontend-5ddc45565d-sh5q5    Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef" in 2.131s (2.132s including waiting). Image size: 27462876 bytes.
+47m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-9584598b6 from 1 to 0
+47m         Normal    SuccessfulDelete    replicaset/frontend-9584598b6    Deleted pod: frontend-9584598b6-vblm5
+47m         Normal    Started             pod/worker-5f6d4857bd-4ghfs      Container started
+47m         Normal    Killing             pod/frontend-9584598b6-vblm5     Stopping container frontend
+47m         Warning   Unhealthy           pod/backend-c785795d9-wl6w2      Readiness probe failed: Get "http://10.42.1.53:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+47m         Normal    Pulling             pod/backend-c785795d9-hbhp7      Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:6af8bef"
+47m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-6fc5cf494f from 2 to 1
+24m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-c785795d9 from 1 to 2
+47m         Normal    SuccessfulCreate    replicaset/backend-c785795d9     Created pod: backend-c785795d9-hbhp7
+47m         Normal    SuccessfulDelete    replicaset/backend-6fc5cf494f    Deleted pod: backend-6fc5cf494f-q66wf
+47m         Normal    Killing             pod/backend-6fc5cf494f-q66wf     Stopping container backend
+47m         Warning   Unhealthy           pod/backend-6fc5cf494f-q66wf     Readiness probe failed: Get "http://10.42.1.51:8000/readyz": read tcp 10.42.1.1:44594->10.42.1.51:8000: read: connection reset by peer
+47m         Normal    Scheduled           pod/backend-c785795d9-hbhp7      Successfully assigned devops-app/backend-c785795d9-hbhp7 to k3d-devops-server-0
+47m         Normal    Started             pod/backend-c785795d9-hbhp7      Container started
+47m         Normal    Pulled              pod/backend-c785795d9-hbhp7      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:6af8bef" in 4.761s (4.761s including waiting). Image size: 66267371 bytes.
+47m         Normal    Created             pod/backend-c785795d9-hbhp7      Container created
+25m         Warning   Unhealthy           pod/backend-c785795d9-hbhp7      Readiness probe failed: Get "http://10.42.2.54:8000/readyz": dial tcp 10.42.2.54:8000: connect: connection refused
+47m         Warning   Unhealthy           pod/backend-c785795d9-hbhp7      Readiness probe failed: Get "http://10.42.2.54:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+47m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-6fc5cf494f from 1 to 0
+47m         Normal    SuccessfulDelete    replicaset/backend-6fc5cf494f    Deleted pod: backend-6fc5cf494f-ghnft
+47m         Normal    Killing             pod/backend-6fc5cf494f-ghnft     Stopping container backend
+47m         Normal    Killing             pod/worker-679f859d64-fkkr8      Stopping container worker
+47m         Normal    ScalingReplicaSet   deployment/worker                Scaled down replica set worker-679f859d64 from 1 to 0
+47m         Normal    SuccessfulDelete    replicaset/worker-679f859d64     Deleted pod: worker-679f859d64-fkkr8
+46m         Warning   Unhealthy           pod/worker-679f859d64-fkkr8      Readiness probe errored and resulted in unknown state: rpc error: code = Canceled desc = context canceled
+25m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-6d864999dd from 0 to 1
+25m         Normal    SuccessfulCreate    replicaset/backend-6d864999dd    Created pod: backend-6d864999dd-ghrzn
+25m         Normal    Pulling             pod/backend-6d864999dd-ghrzn     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:7977849"
+25m         Normal    Pulling             pod/frontend-5d9b4cf5dc-44j5q    Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:7977849"
+25m         Normal    Scheduled           pod/worker-d8cb9856c-2gpvh       Successfully assigned devops-app/worker-d8cb9856c-2gpvh to k3d-devops-server-0
+25m         Normal    Pulling             pod/worker-d8cb9856c-2gpvh       Pulling image "ghcr.io/osk4rum-creator/devops-app/worker:7977849"
+25m         Normal    SuccessfulCreate    replicaset/worker-d8cb9856c      Created pod: worker-d8cb9856c-2gpvh
+25m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-5d9b4cf5dc from 0 to 1
+25m         Normal    ScalingReplicaSet   deployment/worker                Scaled up replica set worker-d8cb9856c from 0 to 1
+25m         Normal    Scheduled           pod/frontend-5d9b4cf5dc-44j5q    Successfully assigned devops-app/frontend-5d9b4cf5dc-44j5q to k3d-devops-server-0
+25m         Normal    SuccessfulCreate    replicaset/frontend-5d9b4cf5dc   Created pod: frontend-5d9b4cf5dc-44j5q
+25m         Normal    Scheduled           pod/backend-6d864999dd-ghrzn     Successfully assigned devops-app/backend-6d864999dd-ghrzn to k3d-devops-server-0
+25m         Normal    Pulled              pod/frontend-5d9b4cf5dc-44j5q    Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:7977849" in 2.949s (2.949s including waiting). Image size: 27462864 bytes.
+25m         Normal    Started             pod/frontend-5d9b4cf5dc-44j5q    Container started
+25m         Normal    Created             pod/frontend-5d9b4cf5dc-44j5q    Container created
+25m         Normal    Pulling             pod/frontend-5d9b4cf5dc-dwzkz    Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:7977849"
+16m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-5ddc45565d from 2 to 1
+25m         Normal    SuccessfulCreate    replicaset/frontend-5d9b4cf5dc   Created pod: frontend-5d9b4cf5dc-dwzkz
+25m         Normal    SuccessfulDelete    replicaset/frontend-5ddc45565d   Deleted pod: frontend-5ddc45565d-sh5q5
+25m         Normal    Killing             pod/frontend-5ddc45565d-sh5q5    Stopping container frontend
+25m         Normal    Scheduled           pod/frontend-5d9b4cf5dc-dwzkz    Successfully assigned devops-app/frontend-5d9b4cf5dc-dwzkz to k3d-devops-agent-1
+25m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-5d9b4cf5dc from 1 to 2
+25m         Normal    Started             pod/backend-6d864999dd-ghrzn     Container started
+25m         Normal    Created             pod/backend-6d864999dd-ghrzn     Container created
+25m         Normal    Pulled              pod/backend-6d864999dd-ghrzn     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:7977849" in 6.032s (6.032s including waiting). Image size: 66267364 bytes.
+25m         Normal    Started             pod/frontend-5d9b4cf5dc-dwzkz    Container started
+25m         Warning   Unhealthy           pod/backend-6d864999dd-ghrzn     Readiness probe failed: Get "http://10.42.2.58:8000/readyz": dial tcp 10.42.2.58:8000: connect: connection refused
+25m         Normal    Pulled              pod/frontend-5d9b4cf5dc-dwzkz    Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:7977849" in 2.232s (2.232s including waiting). Image size: 27462864 bytes.
+25m         Normal    Started             pod/worker-d8cb9856c-2gpvh       Container started
+25m         Normal    Created             pod/worker-d8cb9856c-2gpvh       Container created
+25m         Normal    Pulled              pod/worker-d8cb9856c-2gpvh       Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/worker:7977849" in 6.871s (6.871s including waiting). Image size: 64120923 bytes.
+25m         Normal    Created             pod/frontend-5d9b4cf5dc-dwzkz    Container created
+25m         Normal    Killing             pod/frontend-5ddc45565d-v5mxk    Stopping container frontend
+25m         Normal    SuccessfulDelete    replicaset/frontend-5ddc45565d   Deleted pod: frontend-5ddc45565d-v5mxk
+16m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-5ddc45565d from 1 to 0
+25m         Warning   Unhealthy           pod/backend-6d864999dd-ghrzn     Readiness probe failed: Get "http://10.42.2.58:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+25m         Normal    SuccessfulDelete    replicaset/backend-c785795d9     Deleted pod: backend-c785795d9-hbhp7
+16m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-c785795d9 from 2 to 1
+25m         Normal    Scheduled           pod/backend-6d864999dd-ttk7d     Successfully assigned devops-app/backend-6d864999dd-ttk7d to k3d-devops-agent-1
+25m         Normal    Pulling             pod/backend-6d864999dd-ttk7d     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:7977849"
+25m         Normal    Killing             pod/backend-c785795d9-hbhp7      Stopping container backend
+25m         Normal    SuccessfulCreate    replicaset/backend-6d864999dd    Created pod: backend-6d864999dd-ttk7d
+25m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-6d864999dd from 1 to 2
+25m         Normal    Started             pod/backend-6d864999dd-ttk7d     Container started
+25m         Normal    Created             pod/backend-6d864999dd-ttk7d     Container created
+25m         Normal    Pulled              pod/backend-6d864999dd-ttk7d     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:7977849" in 6.17s (6.17s including waiting). Image size: 66267364 bytes.
+25m         Normal    Killing             pod/worker-5f6d4857bd-4ghfs      Stopping container worker
+25m         Normal    SuccessfulDelete    replicaset/worker-5f6d4857bd     Deleted pod: worker-5f6d4857bd-4ghfs
+16m         Normal    ScalingReplicaSet   deployment/worker                Scaled down replica set worker-5f6d4857bd from 1 to 0
+25m         Warning   Unhealthy           pod/backend-6d864999dd-ttk7d     Readiness probe failed: Get "http://10.42.1.61:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+16m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-c785795d9 from 1 to 0
+25m         Normal    Killing             pod/backend-c785795d9-wl6w2      Stopping container backend
+25m         Normal    SuccessfulDelete    replicaset/backend-c785795d9     Deleted pod: backend-c785795d9-wl6w2
+25m         Warning   Unhealthy           pod/worker-5f6d4857bd-4ghfs      Readiness probe errored and resulted in unknown state: rpc error: code = Canceled desc = context canceled
+24m         Normal    SuccessfulCreate    replicaset/worker-5f6d4857bd     Created pod: worker-5f6d4857bd-q5t9z
+24m         Normal    Scheduled           pod/frontend-5ddc45565d-s98sm    Successfully assigned devops-app/frontend-5ddc45565d-s98sm to k3d-devops-server-0
+24m         Normal    Pulled              pod/frontend-5ddc45565d-s98sm    Container image "ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef" already present on machine and can be accessed by the pod
+24m         Normal    Created             pod/frontend-5ddc45565d-s98sm    Container created
+24m         Normal    Started             pod/frontend-5ddc45565d-s98sm    Container started
+24m         Normal    Started             pod/backend-c785795d9-622nm      Container started
+24m         Normal    Created             pod/worker-5f6d4857bd-q5t9z      Container created
+24m         Normal    Pulled              pod/worker-5f6d4857bd-q5t9z      Container image "ghcr.io/osk4rum-creator/devops-app/worker:6af8bef" already present on machine and can be accessed by the pod
+24m         Normal    Scheduled           pod/worker-5f6d4857bd-q5t9z      Successfully assigned devops-app/worker-5f6d4857bd-q5t9z to k3d-devops-agent-1
+24m         Normal    Created             pod/backend-c785795d9-622nm      Container created
+24m         Normal    SuccessfulCreate    replicaset/frontend-5ddc45565d   Created pod: frontend-5ddc45565d-s98sm
+24m         Normal    Pulled              pod/backend-c785795d9-622nm      Container image "ghcr.io/osk4rum-creator/devops-app/backend:6af8bef" already present on machine and can be accessed by the pod
+24m         Normal    Scheduled           pod/backend-c785795d9-622nm      Successfully assigned devops-app/backend-c785795d9-622nm to k3d-devops-agent-1
+24m         Normal    SuccessfulCreate    replicaset/backend-c785795d9     Created pod: backend-c785795d9-622nm
+24m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-5d9b4cf5dc from 2 to 1
+24m         Normal    SuccessfulCreate    replicaset/frontend-5ddc45565d   Created pod: frontend-5ddc45565d-889mz
+24m         Warning   Unhealthy           pod/backend-c785795d9-622nm      Readiness probe failed: Get "http://10.42.1.62:8000/readyz": dial tcp 10.42.1.62:8000: connect: connection refused
+24m         Normal    Scheduled           pod/frontend-5ddc45565d-889mz    Successfully assigned devops-app/frontend-5ddc45565d-889mz to k3d-devops-agent-1
+24m         Normal    Started             pod/worker-5f6d4857bd-q5t9z      Container started
+24m         Normal    SuccessfulDelete    replicaset/frontend-5d9b4cf5dc   Deleted pod: frontend-5d9b4cf5dc-44j5q
+24m         Normal    Killing             pod/frontend-5d9b4cf5dc-44j5q    Stopping container frontend
+24m         Normal    SuccessfulDelete    replicaset/frontend-5d9b4cf5dc   Deleted pod: frontend-5d9b4cf5dc-dwzkz
+24m         Normal    Created             pod/frontend-5ddc45565d-889mz    Container created
+24m         Normal    Started             pod/frontend-5ddc45565d-889mz    Container started
+24m         Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-5d9b4cf5dc from 1 to 0
+24m         Normal    Killing             pod/frontend-5d9b4cf5dc-dwzkz    Stopping container frontend
+24m         Normal    Pulled              pod/frontend-5ddc45565d-889mz    Container image "ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef" already present on machine and can be accessed by the pod
+24m         Warning   Unhealthy           pod/backend-c785795d9-622nm      Readiness probe failed: Get "http://10.42.1.62:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+24m         Normal    Killing             pod/backend-6d864999dd-ttk7d     Stopping container backend
+24m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-6d864999dd from 2 to 1
+24m         Normal    Scheduled           pod/backend-c785795d9-j6j5n      Successfully assigned devops-app/backend-c785795d9-j6j5n to k3d-devops-server-0
+24m         Normal    SuccessfulDelete    replicaset/backend-6d864999dd    Deleted pod: backend-6d864999dd-ttk7d
+24m         Normal    Pulled              pod/backend-c785795d9-j6j5n      Container image "ghcr.io/osk4rum-creator/devops-app/backend:6af8bef" already present on machine and can be accessed by the pod
+24m         Normal    Created             pod/backend-c785795d9-j6j5n      Container created
+24m         Normal    Started             pod/backend-c785795d9-j6j5n      Container started
+24m         Normal    SuccessfulCreate    replicaset/backend-c785795d9     Created pod: backend-c785795d9-j6j5n
+16m         Warning   Unhealthy           pod/backend-c785795d9-j6j5n      Readiness probe failed: Get "http://10.42.2.62:8000/readyz": dial tcp 10.42.2.62:8000: connect: connection refused
+23m         Normal    Killing             pod/backend-6d864999dd-ghrzn     Stopping container backend
+23m         Normal    SuccessfulDelete    replicaset/backend-6d864999dd    Deleted pod: backend-6d864999dd-ghrzn
+23m         Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-6d864999dd from 1 to 0
+23m         Normal    SuccessfulDelete    replicaset/worker-d8cb9856c      Deleted pod: worker-d8cb9856c-2gpvh
+23m         Normal    Killing             pod/worker-d8cb9856c-2gpvh       Stopping container worker
+23m         Normal    ScalingReplicaSet   deployment/worker                Scaled down replica set worker-d8cb9856c from 1 to 0
+23m         Warning   Unhealthy           pod/worker-d8cb9856c-2gpvh       Readiness probe errored and resulted in unknown state: rpc error: code = Canceled desc = context canceled
+16m         Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-594f6b4864 from 0 to 1
+16m         Normal    Scheduled           pod/frontend-bc9b9f9cf-7nfxb     Successfully assigned devops-app/frontend-bc9b9f9cf-7nfxb to k3d-devops-agent-1
+16m         Normal    SuccessfulCreate    replicaset/worker-68d766c467     Created pod: worker-68d766c467-52g7r
+16m         Normal    Scheduled           pod/worker-68d766c467-52g7r      Successfully assigned devops-app/worker-68d766c467-52g7r to k3d-devops-agent-1
+16m         Normal    ScalingReplicaSet   deployment/worker                Scaled up replica set worker-68d766c467 from 0 to 1
+16m         Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-bc9b9f9cf from 0 to 1
+16m         Normal    SuccessfulCreate    replicaset/backend-594f6b4864    Created pod: backend-594f6b4864-mn7b5
+16m         Normal    Scheduled           pod/backend-594f6b4864-mn7b5     Successfully assigned devops-app/backend-594f6b4864-mn7b5 to k3d-devops-agent-1
+16m         Normal    SuccessfulCreate    replicaset/frontend-bc9b9f9cf    Created pod: frontend-bc9b9f9cf-7nfxb
+16m         Normal    Pulling             pod/frontend-bc9b9f9cf-7nfxb     Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:b96be36"
+16m         Normal    Pulling             pod/worker-68d766c467-52g7r      Pulling image "ghcr.io/osk4rum-creator/devops-app/worker:b96be36"
+16m         Normal    Pulling             pod/backend-594f6b4864-mn7b5     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:b96be36"
+16m         Normal    Started             pod/frontend-bc9b9f9cf-7nfxb     Container started
+16m         Normal    Created             pod/frontend-bc9b9f9cf-7nfxb     Container created
+16m         Normal    Pulled              pod/frontend-bc9b9f9cf-7nfxb     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:b96be36" in 2.559s (2.559s including waiting). Image size: 27462874 bytes.
+16m         Normal    SuccessfulCreate    replicaset/frontend-bc9b9f9cf    Created pod: frontend-bc9b9f9cf-x97pb
+16m         Normal    Scheduled           pod/frontend-bc9b9f9cf-x97pb     Successfully assigned devops-app/frontend-bc9b9f9cf-x97pb to k3d-devops-server-0
+16m         Normal    Killing             pod/frontend-5ddc45565d-889mz    Stopping container frontend
+16m         Normal    ScalingReplicaSet   deployment/frontend              (combined from similar events): Scaled up replica set frontend-bc9b9f9cf from 1 to 2
+16m         Normal    SuccessfulDelete    replicaset/frontend-5ddc45565d   Deleted pod: frontend-5ddc45565d-889mz
+16m         Normal    Pulling             pod/frontend-bc9b9f9cf-x97pb     Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:b96be36"
+16m         Normal    Started             pod/frontend-bc9b9f9cf-x97pb     Container started
+16m         Normal    Created             pod/frontend-bc9b9f9cf-x97pb     Container created
+16m         Normal    Pulled              pod/frontend-bc9b9f9cf-x97pb     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:b96be36" in 2.235s (2.235s including waiting). Image size: 27462874 bytes.
+16m         Normal    Started             pod/worker-68d766c467-52g7r      Container started
+16m         Normal    SuccessfulDelete    replicaset/frontend-5ddc45565d   Deleted pod: frontend-5ddc45565d-s98sm
+16m         Normal    Pulled              pod/worker-68d766c467-52g7r      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/worker:b96be36" in 7.627s (7.627s including waiting). Image size: 64120898 bytes.
+16m         Normal    Killing             pod/frontend-5ddc45565d-s98sm    Stopping container frontend
+16m         Normal    Pulled              pod/backend-594f6b4864-mn7b5     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:b96be36" in 8.45s (8.45s including waiting). Image size: 66267316 bytes.
+16m         Normal    Created             pod/worker-68d766c467-52g7r      Container created
+16m         Normal    Created             pod/backend-594f6b4864-mn7b5     Container created
+16m         Warning   Unhealthy           pod/backend-594f6b4864-mn7b5     Readiness probe failed: Get "http://10.42.1.68:8000/readyz": dial tcp 10.42.1.68:8000: connect: connection refused
+16m         Normal    Started             pod/backend-594f6b4864-mn7b5     Container started
+16m         Normal    SuccessfulDelete    replicaset/backend-c785795d9     Deleted pod: backend-c785795d9-622nm
+16m         Normal    Pulling             pod/backend-594f6b4864-6wv8j     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:b96be36"
+16m         Normal    ScalingReplicaSet   deployment/backend               (combined from similar events): Scaled up replica set backend-594f6b4864 from 1 to 2
+16m         Normal    Scheduled           pod/backend-594f6b4864-6wv8j     Successfully assigned devops-app/backend-594f6b4864-6wv8j to k3d-devops-server-0
+16m         Normal    Killing             pod/backend-c785795d9-622nm      Stopping container backend
+16m         Normal    SuccessfulCreate    replicaset/backend-594f6b4864    Created pod: backend-594f6b4864-6wv8j
+16m         Normal    Started             pod/backend-594f6b4864-6wv8j     Container started
+16m         Normal    Created             pod/backend-594f6b4864-6wv8j     Container created
+16m         Normal    Pulled              pod/backend-594f6b4864-6wv8j     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:b96be36" in 5.207s (5.207s including waiting). Image size: 66267316 bytes.
+16m         Warning   Unhealthy           pod/backend-594f6b4864-6wv8j     Readiness probe failed: Get "http://10.42.2.65:8000/readyz": dial tcp 10.42.2.65:8000: connect: connection refused
+16m         Normal    SuccessfulDelete    replicaset/backend-c785795d9     Deleted pod: backend-c785795d9-j6j5n
+16m         Normal    Killing             pod/backend-c785795d9-j6j5n      Stopping container backend
+16m         Normal    Killing             pod/worker-5f6d4857bd-q5t9z      Stopping container worker
+16m         Normal    SuccessfulDelete    replicaset/worker-5f6d4857bd     Deleted pod: worker-5f6d4857bd-q5t9z
+15m         Warning   Unhealthy           pod/worker-5f6d4857bd-q5t9z      Readiness probe errored and resulted in unknown state: rpc error: code = Canceled desc = context canceled
+3m39s       Normal    Scheduled           pod/frontend-576ff67b-8dgqq      Successfully assigned devops-app/frontend-576ff67b-8dgqq to k3d-devops-agent-1
+3m39s       Normal    Scheduled           pod/worker-74fdd885fd-xmhp8      Successfully assigned devops-app/worker-74fdd885fd-xmhp8 to k3d-devops-agent-1
+3m39s       Normal    Scheduled           pod/backend-76d6d4d747-sxldv     Successfully assigned devops-app/backend-76d6d4d747-sxldv to k3d-devops-agent-1
+3m40s       Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-576ff67b from 0 to 1
+3m40s       Normal    SuccessfulCreate    replicaset/frontend-576ff67b     Created pod: frontend-576ff67b-8dgqq
+3m40s       Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-76d6d4d747 from 0 to 1
+3m40s       Normal    SuccessfulCreate    replicaset/backend-76d6d4d747    Created pod: backend-76d6d4d747-sxldv
+3m40s       Normal    ScalingReplicaSet   deployment/worker                Scaled up replica set worker-74fdd885fd from 0 to 1
+3m40s       Normal    SuccessfulCreate    replicaset/worker-74fdd885fd     Created pod: worker-74fdd885fd-xmhp8
+3m39s       Normal    Pulling             pod/frontend-576ff67b-8dgqq      Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:f477fca"
+3m39s       Normal    Pulling             pod/backend-76d6d4d747-sxldv     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:f477fca"
+3m39s       Normal    Pulling             pod/worker-74fdd885fd-xmhp8      Pulling image "ghcr.io/osk4rum-creator/devops-app/worker:f477fca"
+3m36s       Normal    Pulled              pod/frontend-576ff67b-8dgqq      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:f477fca" in 3.31s (3.31s including waiting). Image size: 27462850 bytes.
+3m36s       Normal    Created             pod/frontend-576ff67b-8dgqq      Container created
+3m35s       Normal    Started             pod/frontend-576ff67b-8dgqq      Container started
+3m35s       Normal    Killing             pod/frontend-bc9b9f9cf-7nfxb     Stopping container frontend
+3m35s       Normal    SuccessfulDelete    replicaset/frontend-bc9b9f9cf    Deleted pod: frontend-bc9b9f9cf-7nfxb
+3m35s       Normal    SuccessfulCreate    replicaset/frontend-576ff67b     Created pod: frontend-576ff67b-4pksz
+3m35s       Normal    Scheduled           pod/frontend-576ff67b-4pksz      Successfully assigned devops-app/frontend-576ff67b-4pksz to k3d-devops-server-0
+3m35s       Normal    ScalingReplicaSet   deployment/frontend              Scaled up replica set frontend-576ff67b from 1 to 2
+3m35s       Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-bc9b9f9cf from 2 to 1
+3m34s       Normal    Pulling             pod/frontend-576ff67b-4pksz      Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:f477fca"
+3m32s       Normal    Pulled              pod/worker-74fdd885fd-xmhp8      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/worker:f477fca" in 7.298s (7.298s including waiting). Image size: 64120892 bytes.
+3m32s       Normal    Created             pod/worker-74fdd885fd-xmhp8      Container created
+3m32s       Normal    Started             pod/backend-76d6d4d747-sxldv     Container started
+3m32s       Normal    Created             pod/frontend-576ff67b-4pksz      Container created
+3m32s       Normal    Pulled              pod/frontend-576ff67b-4pksz      Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:f477fca" in 2.165s (2.165s including waiting). Image size: 27462850 bytes.
+3m32s       Warning   Unhealthy           pod/backend-76d6d4d747-sxldv     Readiness probe failed: Get "http://10.42.1.72:8000/readyz": dial tcp 10.42.1.72:8000: connect: connection refused
+3m32s       Normal    Created             pod/backend-76d6d4d747-sxldv     Container created
+3m32s       Normal    Started             pod/worker-74fdd885fd-xmhp8      Container started
+3m32s       Normal    Pulled              pod/backend-76d6d4d747-sxldv     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:f477fca" in 6.567s (6.567s including waiting). Image size: 66267259 bytes.
+3m32s       Normal    Started             pod/frontend-576ff67b-4pksz      Container started
+3m31s       Normal    SuccessfulDelete    replicaset/frontend-bc9b9f9cf    Deleted pod: frontend-bc9b9f9cf-x97pb
+3m31s       Normal    Killing             pod/frontend-bc9b9f9cf-x97pb     Stopping container frontend
+3m31s       Normal    ScalingReplicaSet   deployment/frontend              Scaled down replica set frontend-bc9b9f9cf from 1 to 0
+3m30s       Warning   Unhealthy           pod/backend-76d6d4d747-sxldv     Readiness probe failed: Get "http://10.42.1.72:8000/readyz": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+3m26s       Normal    SuccessfulDelete    replicaset/backend-594f6b4864    Deleted pod: backend-594f6b4864-mn7b5
+3m25s       Normal    Scheduled           pod/backend-76d6d4d747-5gn4r     Successfully assigned devops-app/backend-76d6d4d747-5gn4r to k3d-devops-server-0
+3m26s       Normal    Killing             pod/backend-594f6b4864-mn7b5     Stopping container backend
+3m26s       Normal    SuccessfulCreate    replicaset/backend-76d6d4d747    Created pod: backend-76d6d4d747-5gn4r
+3m26s       Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-594f6b4864 from 2 to 1
+3m26s       Normal    ScalingReplicaSet   deployment/backend               Scaled up replica set backend-76d6d4d747 from 1 to 2
+3m25s       Normal    Pulling             pod/backend-76d6d4d747-5gn4r     Pulling image "ghcr.io/osk4rum-creator/devops-app/backend:f477fca"
+3m20s       Normal    Started             pod/backend-76d6d4d747-5gn4r     Container started
+3m20s       Warning   Unhealthy           pod/backend-76d6d4d747-5gn4r     Readiness probe failed: Get "http://10.42.2.69:8000/readyz": dial tcp 10.42.2.69:8000: connect: connection refused
+3m20s       Normal    Created             pod/backend-76d6d4d747-5gn4r     Container created
+3m20s       Normal    Pulled              pod/backend-76d6d4d747-5gn4r     Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/backend:f477fca" in 4.687s (4.687s including waiting). Image size: 66267259 bytes.
+3m19s       Normal    Killing             pod/worker-68d766c467-52g7r      Stopping container worker
+3m19s       Normal    SuccessfulDelete    replicaset/worker-68d766c467     Deleted pod: worker-68d766c467-52g7r
+3m19s       Normal    ScalingReplicaSet   deployment/worker                Scaled down replica set worker-68d766c467 from 1 to 0
+3m18s       Normal    ScalingReplicaSet   deployment/backend               Scaled down replica set backend-594f6b4864 from 1 to 0
+3m18s       Normal    Killing             pod/backend-594f6b4864-6wv8j     Stopping container backend
+2m58s       Warning   Unhealthy           pod/worker-68d766c467-52g7r      Readiness probe errored and resulted in unknown state: rpc error: code = Canceled desc = context canceled
+3m18s       Normal    SuccessfulDelete    replicaset/backend-594f6b4864    Deleted pod: backend-594f6b4864-6wv8j
 
 $ helm history devops-app -n devops-app --max 10
 REVISION	UPDATED                 	STATUS    	CHART           	APP VERSION	DESCRIPTION     
-2       	Wed Oct 28 13:14:44 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
-3       	Wed Oct 28 13:33:15 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
-4       	Thu Oct 29 09:56:05 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
-5       	Thu Oct 29 09:58:22 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
 6       	Thu Oct 29 10:32:01 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
 7       	Thu Oct 29 10:34:21 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
 8       	Thu Oct 29 10:35:58 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
 9       	Sat Oct 31 06:32:40 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
 10      	Sat Oct 31 06:42:22 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
-11      	Sat Oct 31 07:04:07 2026	deployed  	devops-app-0.1.0	1.0.0      	Upgrade complete
+11      	Sat Oct 31 07:04:07 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
+12      	Sat Oct 31 09:05:42 2026	superseded	devops-app-0.1.0	1.0.0      	Rollback to 10  
+13      	Sat Oct 31 07:13:21 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
+14      	Sat Oct 31 07:26:12 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
+15      	Sat Oct 31 07:28:32 2026	deployed  	devops-app-0.1.0	1.0.0      	Upgrade complete
 
-## Running version matches CI tag 7977849:
-  frontend: ghcr.io/osk4rum-creator/devops-app/frontend:7977849  OK
-  backend: ghcr.io/osk4rum-creator/devops-app/backend:7977849  OK
-  worker: ghcr.io/osk4rum-creator/devops-app/worker:7977849  OK
+## Running version matches CI tag f477fca:
+  frontend: ghcr.io/osk4rum-creator/devops-app/frontend:f477fca  OK
+  backend: ghcr.io/osk4rum-creator/devops-app/backend:f477fca  OK
+  worker: ghcr.io/osk4rum-creator/devops-app/worker:f477fca  OK

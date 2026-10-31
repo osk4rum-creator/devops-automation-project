@@ -1,19 +1,18 @@
-# Jenkins installation - collected 2026-10-31 09:04
+# Jenkins installation - collected 2026-10-31 09:29
 
 $ kubectl get namespaces
 NAME              STATUS   AGE
-default           Active   5d4h
-devops-app        Active   4d18h
+default           Active   5d5h
+devops-app        Active   4d19h
 jenkins           Active   45h
-kube-node-lease   Active   5d4h
-kube-public       Active   5d4h
-kube-system       Active   5d4h
+kube-node-lease   Active   5d5h
+kube-public       Active   5d5h
+kube-system       Active   5d5h
 
 $ kubectl get pods -n jenkins -o wide
-NAME                                 READY   STATUS        RESTARTS   AGE     IP           NODE                 NOMINATED NODE   READINESS GATES
-application-cd-4-1t21b-9dptt-4wk4t   3/3     Terminating   0          68s     10.42.1.59   k3d-devops-agent-1   <none>           <none>
-jenkins-0                            2/2     Running       0          53m     10.42.0.55   k3d-devops-agent-0   <none>           <none>
-webhook-relay-5d7db568bc-tmwsk       1/1     Running       0          7m19s   10.42.1.58   k3d-devops-agent-1   <none>           <none>
+NAME                             READY   STATUS    RESTARTS   AGE   IP           NODE                 NOMINATED NODE   READINESS GATES
+jenkins-0                        2/2     Running   0          78m   10.42.0.55   k3d-devops-agent-0   <none>           <none>
+webhook-relay-5d7db568bc-tmwsk   1/1     Running   0          31m   10.42.1.58   k3d-devops-agent-1   <none>           <none>
 
 $ kubectl get service,ingress,pvc -n jenkins
 NAME                    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)     AGE

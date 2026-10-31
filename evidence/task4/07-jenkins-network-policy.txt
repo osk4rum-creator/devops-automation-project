@@ -1,0 +1,11 @@
+# Jenkins namespace NetworkPolicy tests - 2026-10-31 09:27
+
+NAME                   POD-SELECTOR                                     AGE
+default-deny-ingress   <none>                                           6s
+jenkins-controller     app.kubernetes.io/component=jenkins-controller   6s
+
+UI through Traefik (allowed):        HTTP 200
+Webhook relay -> controller (allowed): POST http://jenkins.jenkins.svc.cluster.local:8080/github-webhook/ - 200
+Control - outsider pod can use DNS:  yes
+Pod in another namespace -> controller :8080 (blocked): BLOCKED (correct)
+Agent pod (CD #7) -> controller over websocket with policy active: SUCCESS

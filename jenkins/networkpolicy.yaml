@@ -1,0 +1,46 @@
+# NetworkPolicies for the "jenkins" namespace (INGRESS = who may connect in).
+#
+#   Traefik (UI at jenkins.localhost) ----\
+#   agent pods (websocket connection) -----+--> jenkins controller :8080
+#   webhook relay (GitHub push events) ----/
+#   anything else ------------------------X
+#   anyone --> agent pods / relay ---------X   (they accept no connections)
+#
+# EGRESS is deliberately left open: agents must reach GitHub, GHCR, Docker
+# Hub, PyPI, the Trivy vulnerability DB and the Kubernetes API, whose IPs
+# change constantly (CDNs). Restricting that needs an egress proxy or FQDN
+# policies (e.g. Cilium) - see README trade-offs.
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: jenkins
+spec:
+  podSelector: {}                 # every pod in the namespace (controller, agents, relay)
+  policyTypes: [Ingress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: jenkins-controller
+  namespace: jenkins
+spec:
+  podSelector:
+    matchLabels: { app.kubernetes.io/component: jenkins-controller }
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        # UI through the ingress controller
+        - namespaceSelector:
+            matchLabels: { kubernetes.io/metadata.name: kube-system }
+          podSelector:
+            matchLabels: { app.kubernetes.io/name: traefik }
+        # Agent pods connecting back over websocket
+        - podSelector:
+            matchLabels: { jenkins/jenkins-jenkins-agent: "true" }
+        # GitHub push events forwarded by the relay
+        - podSelector:
+            matchLabels: { app.kubernetes.io/name: webhook-relay }
+      ports:
+        - { protocol: TCP, port: 8080 }

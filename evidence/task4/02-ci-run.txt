@@ -1,44 +1,44 @@
-# CI pipeline - application-ci #5 - collected 2026-10-31 09:05
+# CI pipeline - application-ci #8 - collected 2026-10-31 09:29
 
 ## Started by:
 Started by GitHub push by osk4rum-creator
 
 ## Stages:
-  Checkout               SUCCESS      8.2s
+  Checkout               SUCCESS      8.4s
   Validate               SUCCESS      1.4s
   Lint                   SUCCESS     17.9s
-  Test                   SUCCESS      4.6s
-  Build                  SUCCESS     38.3s
-  Scan                   SUCCESS     24.5s
-  Push                   SUCCESS     33.6s
+  Test                   SUCCESS      4.4s
+  Build                  SUCCESS     35.3s
+  Scan                   SUCCESS     18.2s
+  Push                   SUCCESS     13.8s
   Publish metadata       SUCCESS      0.7s
   Trigger CD             SUCCESS      0.1s
   Declarative: Post Actions SUCCESS      0.6s
-  TOTAL                  SUCCESS    136.6s
+  TOTAL                  SUCCESS    106.8s
 
 ## Test results (JUnit):
 {"_class":"hudson.tasks.junit.TestResult","failCount":0,"passCount":8,"skipCount":0}
 
 ## Build metadata handed to CD (archived artifact build-metadata.json):
 {
-  "commit": "7977849805627cd3f982ac0a40e90667c1a860c3",
-  "image_tag": "7977849",
-  "ci_build": "http://jenkins.localhost:8080/job/application-ci/5/",
+  "commit": "f477fcaf09ef544c9644f09646e190379cf70b07",
+  "image_tag": "f477fca",
+  "ci_build": "http://jenkins.localhost:8080/job/application-ci/8/",
   "images":   [
-    "ghcr.io/osk4rum-creator/devops-app/frontend@sha256:0d79641ca1b20b1ba9fb02b9ddcc53d034ad57df38af6681a7d9125f0b06d279",
-    "ghcr.io/osk4rum-creator/devops-app/backend@sha256:3e7c2868a81dacc9151a1244059d3051a9bee2ca716b4b51418e429ddee596b5",
-    "ghcr.io/osk4rum-creator/devops-app/worker@sha256:7658650178da6477e34db06c71a2d85b3646b16f7129b9fac93cbd006ddec659"
+    "ghcr.io/osk4rum-creator/devops-app/frontend@sha256:759f0e2bf1f74655c25b8a380151981c683cb8052ee08530a682aff145e0de97",
+    "ghcr.io/osk4rum-creator/devops-app/backend@sha256:9c2e2bceb6e389ab656c5b2e4e8aa642a990e42261943615b10b61221941c5b1",
+    "ghcr.io/osk4rum-creator/devops-app/worker@sha256:c65ba28420b0022e3517c5b089fcedd156ecf3177b7973e0e6c5940bb37ee7ca"
   ]
 }
 
 ## Key log lines:
-Created Pod: kubernetes jenkins/application-ci-5-tz6q9-w5nzv-2gvt0
-Agent application-ci-5-tz6q9-w5nzv-2gvt0 is provisioned from template application-ci_5-tz6q9-w5nzv
+Created Pod: kubernetes jenkins/application-ci-8-78dlz-dds22-drd7d
+Agent application-ci-8-78dlz-dds22-drd7d is provisioned from template application-ci_8-78dlz-dds22
     image: "gcr.io/go-containerregistry/crane:debug@sha256:e78770b31258a3846f878036d9c1f63fbe4c871f9f56990bf77fd95c013e3c1b"
-Branch: null   Commit: 7977849805627cd3f982ac0a40e90667c1a860c3   Build: #5   Image tag: 7977849
+Branch: origin/main   Commit: f477fcaf09ef544c9644f09646e190379cf70b07   Build: #8   Image tag: f477fca
 All checks passed!
-============================== 5 passed in 0.38s ===============================
-============================== 3 passed in 0.27s ===============================
+============================== 5 passed in 0.42s ===============================
+============================== 3 passed in 0.25s ===============================
 + echo '--- building frontend'
 --- building frontend
 #5 [1/4] FROM docker.io/nginxinc/nginx-unprivileged:1.30.6-alpine@sha256:f5116ed4606f3eb015dd4a8e28cb9b351476dc0ad4bc6e9f93b19cec130cdf03
@@ -55,7 +55,7 @@ All checks passed!
 + echo '--- building worker'
 --- building worker
 #4 [1/6] FROM docker.io/library/python:3.12.16-slim@sha256:8523d6abeb48ceae0b7240d30c5808fc26cb79c1a635bacdf19cf3baecfbec07
-#4 resolve docker.io/library/python:3.12.16-slim@sha256:8523d6abeb48ceae0b7240d30c5808fc26cb79c1a635bacdf19cf3baecfbec07 done
+#4 resolve docker.io/library/python:3.12.16-slim@sha256:8523d6abeb48ceae0b7240d30c5808fc26cb79c1a635bacdf19cf3baecfbec07 0.0s done
 + echo '--- scanning frontend'
 --- scanning frontend
 + echo '--- scanning backend'
@@ -64,17 +64,17 @@ All checks passed!
 --- scanning worker
 + echo '--- pushing frontend'
 --- pushing frontend
-ghcr.io/osk4rum-creator/devops-app/frontend@sha256:0d79641ca1b20b1ba9fb02b9ddcc53d034ad57df38af6681a7d9125f0b06d279
+ghcr.io/osk4rum-creator/devops-app/frontend@sha256:759f0e2bf1f74655c25b8a380151981c683cb8052ee08530a682aff145e0de97
 + echo '--- pushing backend'
 --- pushing backend
-ghcr.io/osk4rum-creator/devops-app/backend@sha256:3e7c2868a81dacc9151a1244059d3051a9bee2ca716b4b51418e429ddee596b5
+ghcr.io/osk4rum-creator/devops-app/backend@sha256:9c2e2bceb6e389ab656c5b2e4e8aa642a990e42261943615b10b61221941c5b1
 + echo '--- pushing worker'
 --- pushing worker
-ghcr.io/osk4rum-creator/devops-app/worker@sha256:7658650178da6477e34db06c71a2d85b3646b16f7129b9fac93cbd006ddec659
-    "ghcr.io/osk4rum-creator/devops-app/frontend@sha256:0d79641ca1b20b1ba9fb02b9ddcc53d034ad57df38af6681a7d9125f0b06d279",
-    "ghcr.io/osk4rum-creator/devops-app/backend@sha256:3e7c2868a81dacc9151a1244059d3051a9bee2ca716b4b51418e429ddee596b5",
-    "ghcr.io/osk4rum-creator/devops-app/worker@sha256:7658650178da6477e34db06c71a2d85b3646b16f7129b9fac93cbd006ddec659"
-Triggered application-cd with IMAGE_TAG=7977849
+ghcr.io/osk4rum-creator/devops-app/worker@sha256:c65ba28420b0022e3517c5b089fcedd156ecf3177b7973e0e6c5940bb37ee7ca
+    "ghcr.io/osk4rum-creator/devops-app/frontend@sha256:759f0e2bf1f74655c25b8a380151981c683cb8052ee08530a682aff145e0de97",
+    "ghcr.io/osk4rum-creator/devops-app/backend@sha256:9c2e2bceb6e389ab656c5b2e4e8aa642a990e42261943615b10b61221941c5b1",
+    "ghcr.io/osk4rum-creator/devops-app/worker@sha256:c65ba28420b0022e3517c5b089fcedd156ecf3177b7973e0e6c5940bb37ee7ca"
+Triggered application-cd with IMAGE_TAG=f477fca
 Finished: SUCCESS
 ## Agent pod lifecycle: CI agent pods present now (build finished -> none expected):
 $ kubectl get pods -n jenkins -l jenkins/agent-role=ci
