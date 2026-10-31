@@ -31,7 +31,9 @@ spec:
       containers:
         - name: smee
           image: node:22.23.4-alpine
-          command: ["npx", "--yes", "smee-client@5.0.0",
+          # smee-client 2.0.4, not 5.x: 5.0.0 strips the trailing "/" from --target,
+          # and Jenkins answers POST /github-webhook (no slash) with 405.
+          command: ["npx", "--yes", "smee-client@2.0.4",
                     "--url", "$(SMEE_URL)",
                     "--target", "http://jenkins.jenkins.svc.cluster.local:8080/github-webhook/"]
           env:
