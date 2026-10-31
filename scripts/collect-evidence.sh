@@ -47,7 +47,7 @@ done
 # --- 2. The app works end to end -------------------------------------------------
 start 04-app-tests.txt "Application tests"
 NOTE="evidence note $(date '+%H:%M:%S')"
-run 04-app-tests.txt curl -s -o /dev/null -w "HTTP %{http_code} from the web page through the Ingress\n" http://localhost:8080/
+run 04-app-tests.txt curl -s -o "$OUT/.page.html" -w "HTTP %{http_code} from the web page through the Ingress\n" http://localhost:8080/
 run 04-app-tests.txt curl -s http://localhost:8080/api/health
 echo "## frontend -> backend (from inside a frontend pod)" >> "$OUT/04-app-tests.txt"
 run 04-app-tests.txt kubectl exec -n $NS deploy/frontend -- wget -qO- http://backend:8000/healthz
@@ -65,7 +65,7 @@ run 04-app-tests.txt psql_q "SELECT id, filename, notified FROM uploads ORDER BY
 echo "## S3 upload while AWS credentials are absent -> clear error, no crash" >> "$OUT/04-app-tests.txt"
 echo "evidence" > "$OUT/.upload-test.txt"
 run 04-app-tests.txt curl -s -F "file=@$OUT/.upload-test.txt" http://localhost:8080/api/upload
-rm -f "$OUT/.upload-test.txt"
+rm -f "$OUT/.upload-test.txt" "$OUT/.page.html"
 
 # --- 3. Self-healing: delete pods, the system keeps working ---------------------------
 start 05-self-healing.txt "Pod restart tests"

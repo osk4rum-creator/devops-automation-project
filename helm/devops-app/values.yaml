@@ -54,13 +54,18 @@ ingress:
 # Pod firewall rules - see templates/networkpolicies.yaml
 networkPolicy:
   enabled: true
-  # Who may reach the frontend: only the ingress controller (Traefik in k3d).
-  # Task 4 adds the Jenkins namespace here for the CD smoke test.
+  # Who may reach the frontend:
+  #   1. the ingress controller (Traefik) - real user traffic
+  #   2. Jenkins CD agent pods only (not CI, not the controller) - post-deploy smoke test
   frontendSources:
     - namespaceSelector:
         matchLabels: { kubernetes.io/metadata.name: kube-system }
       podSelector:
         matchLabels: { app.kubernetes.io/name: traefik }
+    - namespaceSelector:
+        matchLabels: { kubernetes.io/metadata.name: jenkins }
+      podSelector:
+        matchLabels: { jenkins/agent-role: cd }
   # Outbound HTTPS is allowed to the internet (AWS) but NOT to these private
   # ranges, so a compromised pod can't use port 443 to reach internal services.
   privateRanges:

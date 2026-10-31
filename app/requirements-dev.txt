@@ -1,0 +1,3 @@
+# Test + lint tools used by CI (not installed in the production images)
+pytest==8.4.2
+ruff==0.13.0

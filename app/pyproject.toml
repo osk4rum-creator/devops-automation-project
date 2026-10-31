@@ -1,0 +1,19 @@
+# Shared lint + test settings for the Python services (used by CI).
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+# E/F: errors and pyflakes, I: import order, B: likely bugs, S: security checks
+select = ["E", "F", "I", "B", "S"]
+ignore = ["S101"]          # "assert" is fine in tests
+
+[tool.ruff.lint.isort]
+known-first-party = ["src"]  # our own code, sorted after third-party imports
+
+[tool.ruff.lint.per-file-ignores]
+"*/tests/*" = ["S"]
+
+# Tests run per service from its folder:  cd app/backend && python -m pytest tests
+# ("python -m" puts the service folder on the import path, so "from src import ..." works)

@@ -1,0 +1,72 @@
+# Identities and permissions for the Jenkins agents (least privilege).
+#
+#   ServiceAccount         used by            Kubernetes permissions
+#   ---------------------  -----------------  ------------------------------------------
+#   jenkins (chart)        controller         create/delete agent pods in "jenkins" only
+#   jenkins-agent-ci       CI agent pods      NONE - CI builds images, never deploys
+#   jenkins-deployer       CD agent pods      deploy the app chart into "devops-app" only
+#
+# No ClusterRole / ClusterRoleBinding and no cluster-admin anywhere.
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-agent-ci
+  namespace: jenkins
+automountServiceAccountToken: false
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-deployer
+  namespace: jenkins
+---
+# Everything "helm upgrade --install devops-app" creates, plus read access
+# for rollout status, verification and failure diagnostics.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: jenkins-deployer
+  namespace: devops-app
+rules:
+  # Workloads in the chart
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # kubectl rollout status / history follows ReplicaSets
+  - apiGroups: ["apps"]
+    resources: ["replicasets", "controllerrevisions"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["services", "configmaps", "serviceaccounts"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # WHY secrets (broadest permission here): Helm stores each release's state
+  # as a Secret in the target namespace (sh.helm.release.v1.*). Without it
+  # helm can't install, upgrade or roll back. Limited to this one namespace.
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses", "networkpolicies"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+  # Read-only: verification and diagnostics when a deploy fails
+  - apiGroups: [""]
+    resources: ["pods", "pods/log", "events", "persistentvolumeclaims", "endpoints"]
+    verbs: ["get", "list", "watch"]
+  - apiGroups: ["events.k8s.io"]
+    resources: ["events"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-deployer
+  namespace: devops-app            # permissions apply ONLY inside devops-app
+subjects:
+  - kind: ServiceAccount
+    name: jenkins-deployer
+    namespace: jenkins             # ...but are given to an identity living in "jenkins"
+roleRef:
+  kind: Role
+  name: jenkins-deployer
+  apiGroup: rbac.authorization.k8s.io

@@ -1,0 +1,198 @@
+// =============================================================================
+// CI pipeline  (job: application-ci, triggered by a push to GitHub)
+//
+//   Checkout -> Validate -> Lint -> Test -> Build -> Scan -> Push -> Metadata -> Trigger CD
+//
+// CI builds and checks images. It NEVER deploys: its agent pod has no
+// Kubernetes permissions at all. On success it hands the exact image tag to
+// the separate CD job (application-cd).
+//
+// No credentials in this file: the registry token comes from the Jenkins
+// credential "ghcr" (loaded by JCasC from a Kubernetes Secret).
+// =============================================================================
+pipeline {
+    agent {
+        kubernetes {
+            inheritFrom 'ci'            // pod template defined in jenkins/values.yaml
+            defaultContainer 'python'
+        }
+    }
+
+    options {
+        skipDefaultCheckout()           // we check out explicitly in the jnlp container (it has git)
+        timestamps()
+        disableConcurrentBuilds()
+        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+
+    environment {
+        REGISTRY      = 'ghcr.io/osk4rum-creator'   // not secret
+        SERVICES      = 'frontend backend worker'
+        // Registry login is written here (inside the workspace) and deleted in post {}
+        DOCKER_CONFIG = "${WORKSPACE}/.docker"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                container('jnlp') {
+                    checkout scm
+                    script {
+                        // Immutable tag = short commit SHA. Never "latest".
+                        env.IMAGE_TAG = sh(script: 'git rev-parse --short=7 HEAD', returnStdout: true).trim()
+                        env.GIT_SHA   = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()
+                    }
+                }
+                echo "Branch: ${env.GIT_BRANCH}   Commit: ${env.GIT_SHA}   Build: #${env.BUILD_NUMBER}   Image tag: ${env.IMAGE_TAG}"
+                script { currentBuild.description = "tag ${env.IMAGE_TAG}" }
+            }
+        }
+
+        stage('Validate') {
+            steps {
+                // Project structure: everything the build and the CD chart need must exist
+                sh '''
+                    for f in app/frontend/Dockerfile app/backend/Dockerfile app/worker/Dockerfile \
+                             helm/devops-app/Chart.yaml helm/devops-app/values.yaml Jenkinsfile-cd; do
+                        test -f "$f" || { echo "Missing $f"; exit 1; }
+                    done
+                    echo "Project structure OK"
+                '''
+                // Dockerfile best practices (pinned versions, non-root user, ...)
+                container('hadolint') {
+                    sh 'for s in $SERVICES; do echo "--- $s"; hadolint app/$s/Dockerfile; done'
+                }
+            }
+        }
+
+        stage('Lint') {
+            steps {
+                // Isolated virtualenv in the workspace (agent runs as non-root)
+                sh '''
+                    python -m venv .venv
+                    . .venv/bin/activate
+                    pip install -q -r app/requirements-dev.txt -r app/backend/requirements.txt -r app/worker/requirements.txt
+                    cd app && ruff check .
+                '''
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh '''
+                    . .venv/bin/activate
+                    mkdir -p reports
+                    for s in backend worker; do
+                        (cd app/$s && python -m pytest -p no:cacheprovider --junitxml=../../reports/$s.xml tests)
+                    done
+                '''
+            }
+            post {
+                always { junit 'reports/*.xml' }    // results shown in Jenkins ("Tests" tab)
+            }
+        }
+
+        stage('Build') {
+            steps {
+                // Rootless BuildKit: no Docker socket, no privileged container.
+                // Images are written to tar files first, so they can be scanned BEFORE push.
+                container('buildkit') {
+                    sh '''
+                        mkdir -p images
+                        for s in $SERVICES; do
+                            echo "--- building $s"
+                            buildctl-daemonless.sh build \
+                                --frontend dockerfile.v0 \
+                                --local context=app/$s --local dockerfile=app/$s \
+                                --output type=docker,name=$REGISTRY/devops-app/$s:$IMAGE_TAG,dest=images/$s.tar
+                        done
+                    '''
+                }
+            }
+        }
+
+        stage('Scan') {
+            steps {
+                // Gate: fail on any CRITICAL vulnerability that has a fix available.
+                // Full HIGH+CRITICAL reports are archived for review.
+                container('trivy') {
+                    sh '''
+                        mkdir -p reports
+                        for s in $SERVICES; do
+                            echo "--- scanning $s"
+                            trivy image --input images/$s.tar --scanners vuln --no-progress \
+                                --severity HIGH,CRITICAL --format table --output reports/trivy-$s.txt
+                            trivy image --input images/$s.tar --scanners vuln --no-progress \
+                                --severity CRITICAL --ignore-unfixed --exit-code 1
+                        done
+                    '''
+                }
+            }
+            post {
+                always { archiveArtifacts artifacts: 'reports/trivy-*.txt', allowEmptyArchive: true }
+            }
+        }
+
+        stage('Push') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'ghcr',
+                                                  usernameVariable: 'GHCR_USER',
+                                                  passwordVariable: 'GHCR_TOKEN')]) {
+                    container('crane') {
+                        // Single quotes: the shell reads $GHCR_TOKEN, Groovy never sees it,
+                        // and Jenkins masks it in the log.
+                        sh '''
+                            echo "$GHCR_TOKEN" | crane auth login ghcr.io -u "$GHCR_USER" --password-stdin
+                            : > digests.txt
+                            for s in $SERVICES; do
+                                echo "--- pushing $s"
+                                crane push images/$s.tar "$REGISTRY/devops-app/$s:$IMAGE_TAG" | tee -a digests.txt
+                            done
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('Publish metadata') {
+            steps {
+                // Record exactly what was built, for CD and for traceability
+                script {
+                    def digests = readFile('digests.txt').trim().split('\n') as List
+                    writeJSON file: 'build-metadata.json', pretty: 2, json: [
+                        commit   : env.GIT_SHA,
+                        image_tag: env.IMAGE_TAG,
+                        ci_build : env.BUILD_URL,
+                        images   : digests
+                    ]
+                }
+                archiveArtifacts artifacts: 'build-metadata.json, digests.txt'
+                sh 'cat build-metadata.json'
+            }
+        }
+
+        stage('Trigger CD') {
+            steps {
+                // Hand the SAME tag to CD - CD deploys it, it never rebuilds
+                build job: 'application-cd', wait: false, parameters: [
+                    string(name: 'IMAGE_TAG', value: env.IMAGE_TAG),
+                    string(name: 'ENVIRONMENT', value: 'devops-app'),
+                    string(name: 'CI_BUILD', value: env.BUILD_URL)
+                ]
+                echo "Triggered application-cd with IMAGE_TAG=${env.IMAGE_TAG}"
+            }
+        }
+    }
+
+    post {
+        always {
+            // Remove the registry login and the image tarballs, even if the build failed
+            sh 'rm -rf "$DOCKER_CONFIG" images .venv'
+            cleanWs()
+        }
+        failure {
+            echo 'CI FAILED - no image was pushed for deployment and CD was NOT triggered.'
+        }
+    }
+}

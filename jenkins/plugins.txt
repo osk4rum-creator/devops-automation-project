@@ -1,0 +1,14 @@
+# Plugins we chose (top level). scripts/lock-plugins.sh resolves these plus all
+# their dependencies for Jenkins 2.580.2 and pins the full list in jenkins/values.yaml.
+kubernetes:4560.vc25b_83890c34
+workflow-aggregator:608.v67378e9d3db_1
+git:5.11.0
+github:1.47.0
+configuration-as-code:2140.v00e72b_047734
+job-dsl:3732.v9a_c49a_61a_313
+credentials-binding:728.v902a_273b_8947
+pipeline-utility-steps:3.810.va_7672d206740
+junit:1454.ve02e195294c8
+ws-cleanup:0.49
+timestamper:1.30
+pipeline-stage-view:2.41

@@ -18,7 +18,9 @@ POLL_SECONDS = int(os.environ.get("POLL_SECONDS", "10"))
 SNS_TOPIC_ARN = os.environ.get("SNS_TOPIC_ARN", "")
 S3_BUCKET = os.environ.get("S3_BUCKET", "")
 AWS_REGION = os.environ.get("AWS_REGION", "eu-central-1")
-HEARTBEAT = pathlib.Path("/tmp/heartbeat")  # liveness probe checks its age
+# Liveness probe checks this file's age. /tmp is a private emptyDir volume of
+# this pod (not shared with other users or containers), so S108 doesn't apply.
+HEARTBEAT = pathlib.Path("/tmp/heartbeat")  # noqa: S108
 
 sns = boto3.client("sns", region_name=AWS_REGION) if SNS_TOPIC_ARN else None
 

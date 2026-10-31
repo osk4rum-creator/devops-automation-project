@@ -1,6 +1,9 @@
 # Pinned base image (never :latest) - "slim" keeps the image small
 FROM python:3.12.16-slim
 
+# Links the image in the registry (GHCR) back to this repository (traceability)
+LABEL org.opencontainers.image.source="https://github.com/osk4rum-creator/devops-automation-project"
+
 # No .pyc files (root filesystem is read-only in Kubernetes), unbuffered logs
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1

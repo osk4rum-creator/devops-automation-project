@@ -1,0 +1,168 @@
+// =============================================================================
+// CD pipeline  (job: application-cd)
+//
+//   Checkout -> Validate input -> Validate manifests -> Authenticate
+//   -> Deploy -> Rollout -> Verify -> Smoke test
+//
+// CD deploys an image that CI ALREADY built, scanned and pushed. It never
+// builds an image and never changes application code. Its agent pod runs as
+// ServiceAccount "jenkins-deployer", which may only manage the app's
+// resources in the devops-app namespace (jenkins/rbac.yaml).
+//
+// Normally started by application-ci with IMAGE_TAG set; can also be run by
+// hand ("Build with Parameters"), e.g. to roll back to an older tag.
+// =============================================================================
+pipeline {
+    agent {
+        kubernetes {
+            inheritFrom 'cd'            // pod template defined in jenkins/values.yaml
+            defaultContainer 'k8s'      // kubectl + helm
+        }
+    }
+
+    options {
+        skipDefaultCheckout()
+        timestamps()
+        disableConcurrentBuilds()       // never two deployments to the same environment at once
+        timeout(time: 20, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+    }
+
+    parameters {
+        string(name: 'IMAGE_TAG', defaultValue: '',
+               description: 'Immutable image tag produced by application-ci (git short SHA). "latest" is rejected.')
+        choice(name: 'ENVIRONMENT', choices: ['devops-app'], description: 'Target namespace')
+        string(name: 'CI_BUILD', defaultValue: '', description: 'URL of the CI build that produced the tag (traceability)')
+    }
+
+    environment {
+        REGISTRY = 'ghcr.io/osk4rum-creator'
+        RELEASE  = 'devops-app'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                // Only the Helm chart is used from the repo - no application code is built
+                container('jnlp') { checkout scm }
+            }
+        }
+
+        stage('Validate input') {
+            steps {
+                script {
+                    if (!(params.IMAGE_TAG ==~ /^[0-9a-f]{7,40}$/)) {
+                        error("IMAGE_TAG '${params.IMAGE_TAG}' rejected: must be an immutable git SHA from CI (empty and 'latest' are not allowed)")
+                    }
+                    def startedBy = currentBuild.getBuildCauses().collect { it.shortDescription }.join(', ')
+                    currentBuild.description = "${params.IMAGE_TAG} -> ${params.ENVIRONMENT}"
+                    echo """Deployment request
+  version (image tag): ${params.IMAGE_TAG}
+  target cluster:      same cluster Jenkins runs in (k3d-devops)
+  target namespace:    ${params.ENVIRONMENT}
+  started by:          ${startedBy}
+  from CI build:       ${params.CI_BUILD ?: 'n/a (manual run)'}"""
+                }
+                // The tag must already exist in the registry for ALL services (built by CI)
+                container('crane') {
+                    sh '''
+                        for s in frontend backend worker; do
+                            printf '%-9s ' "$s"
+                            crane digest "$REGISTRY/devops-app/$s:$IMAGE_TAG" \
+                              || { echo "Image $REGISTRY/devops-app/$s:$IMAGE_TAG not found - was it built by CI?"; exit 1; }
+                        done
+                    '''
+                }
+            }
+        }
+
+        stage('Validate manifests') {
+            steps {
+                // Render the chart and let the cluster validate it WITHOUT changing anything
+                sh '''
+                    helm lint helm/devops-app --set image.tag="$IMAGE_TAG"
+                    helm template "$RELEASE" helm/devops-app -n "$ENVIRONMENT" \
+                        --set image.registry="$REGISTRY/" --set image.tag="$IMAGE_TAG" \
+                      | kubectl apply --dry-run=server -n "$ENVIRONMENT" -f -
+                '''
+            }
+        }
+
+        stage('Authenticate') {
+            steps {
+                // In-cluster identity from the pod's ServiceAccount token - no kubeconfig file anywhere
+                sh '''
+                    kubectl auth whoami
+                    echo "may deploy to $ENVIRONMENT: $(kubectl auth can-i patch deployments -n "$ENVIRONMENT")"
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                    helm upgrade --install "$RELEASE" helm/devops-app \
+                        --namespace "$ENVIRONMENT" \
+                        --set image.registry="$REGISTRY/" \
+                        --set image.tag="$IMAGE_TAG" \
+                        --history-max 10 \
+                        --wait --timeout 5m
+                    helm history "$RELEASE" -n "$ENVIRONMENT" --max 5
+                '''
+            }
+        }
+
+        stage('Rollout') {
+            steps {
+                sh '''
+                    for d in frontend backend worker; do
+                        kubectl rollout status deployment/$d -n "$ENVIRONMENT" --timeout=180s
+                    done
+                    kubectl rollout status statefulset/postgres -n "$ENVIRONMENT" --timeout=180s
+                '''
+            }
+        }
+
+        stage('Verify') {
+            steps {
+                // Prove the REQUESTED version is what's running
+                sh '''
+                    kubectl get deployments,pods,services,ingress -n "$ENVIRONMENT"
+                    for d in frontend backend worker; do
+                        running=$(kubectl get deployment $d -n "$ENVIRONMENT" -o jsonpath='{.spec.template.spec.containers[0].image}')
+                        echo "$d -> $running"
+                        [ "$running" = "$REGISTRY/devops-app/$d:$IMAGE_TAG" ] || { echo "WRONG VERSION running for $d"; exit 1; }
+                    done
+                '''
+            }
+        }
+
+        stage('Smoke test') {
+            steps {
+                // Call the app like a user would: page + API (which needs the database)
+                sh '''
+                    url="http://frontend.$ENVIRONMENT.svc.cluster.local"
+                    curl -fsS --retry 5 --retry-delay 3 --retry-all-errors "$url/" -o /dev/null && echo "web page OK"
+                    curl -fsS --retry 5 --retry-delay 3 --retry-all-errors "$url/api/health" && echo
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo "DEPLOYED ${params.IMAGE_TAG} to ${params.ENVIRONMENT} (CI build: ${params.CI_BUILD ?: 'manual'})"
+        }
+        failure {
+            // Collect the details needed to understand the failure
+            sh '''
+                echo "===== recent events"; kubectl get events -n "$ENVIRONMENT" --sort-by=.lastTimestamp | tail -25 || true
+                echo "===== pods";          kubectl get pods -n "$ENVIRONMENT" -o wide || true
+                echo "===== release history"; helm history "$RELEASE" -n "$ENVIRONMENT" --max 5 || true
+            '''
+            echo '''DEPLOYMENT FAILED. To roll back:
+  option 1: helm rollback devops-app <REVISION> -n devops-app   (last good revision from the history above)
+  option 2: re-run application-cd with the previous IMAGE_TAG   ("Build with Parameters")'''
+        }
+    }
+}

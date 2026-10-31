@@ -2,9 +2,12 @@
 # Pinned version, never :latest.
 FROM nginxinc/nginx-unprivileged:1.30.6-alpine
 
+# Links the image in the registry (GHCR) back to this repository (traceability)
+LABEL org.opencontainers.image.source="https://github.com/osk4rum-creator/devops-automation-project"
+
 # Apply OS security patches released after the base image was built
 # (found by Trivy). Needs root only for this build step.
-USER root
+USER 0
 RUN apk upgrade --no-cache
 USER 101
 
