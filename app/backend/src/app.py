@@ -104,7 +104,7 @@ def list_notes():
 
 @app.post("/api/notes")
 def create_note():
-    text = (request.get_json(silent=True) or {}).get("text", "")  # BUG (failure demo): .strip() removed
+    text = (request.get_json(silent=True) or {}).get("text", "").strip()
     if not text:
         return {"error": "text is required"}, 400
     with db() as conn:
