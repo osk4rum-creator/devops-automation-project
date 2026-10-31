@@ -1,0 +1,43 @@
+# Failure demo - 2026-10-31 09:16
+
+Commit 946798f Failure demo: intentional bug, strip() removed from note validation introduces a bug (note validation no longer strips spaces).
+
+## CI #7 started by: Started by GitHub push by osk4rum-creator
+## CI #7 result: FAILURE
+
+## Stages:
+  Checkout                   SUCCESS
+  Validate                   SUCCESS
+  Lint                       SUCCESS
+  Test                       FAILED
+  Build                      FAILED
+  Scan                       FAILED
+  Push                       FAILED
+  Publish metadata           FAILED
+  Trigger CD                 FAILED
+  Declarative: Post Actions  SUCCESS
+
+(Stages after Test never ran - the pipeline stopped at Test. Jenkins' API reports
+ skipped stages as FAILED; in the UI they appear greyed out.)
+
+## Test results: "failCount":1,"passCount":4
+
+## Failing test output:
+(KeyError 'DB_HOST' = the request was NOT rejected and went on to the database code,
+ which proves the validation bug; a correct build returns 400 before touching the DB.)
+=========================== short test summary info ============================
+FAILED tests/test_app.py::test_create_note_rejects_empty_text - KeyError: 'DB_HOST'
+========================= 1 failed, 4 passed in 0.45s ==========================
+CI FAILED - no image was pushed for deployment and CD was NOT triggered.
+Finished: FAILURE
+
+## CD triggered? last CD build before: #5, after: #5 -> NOT triggered (correct)
+
+## App still runs the last good version:
+backend  ghcr.io/osk4rum-creator/devops-app/backend:b96be36
+frontend  ghcr.io/osk4rum-creator/devops-app/frontend:b96be36
+worker  ghcr.io/osk4rum-creator/devops-app/worker:b96be36
+health: {"status":"ready"}
+
+## No image was pushed for the broken commit:
+ghcr.io/osk4rum-creator/devops-app/backend:946798f -> HTTP 404 (404 = does not exist)
