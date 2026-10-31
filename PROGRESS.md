@@ -1,7 +1,7 @@
 # Project progress – Tasks 3 & 4
 
-**Overall: 21 / 29 done (72%)**
-`[█████████████████████░░░░░░░░]`
+**Overall: 24 / 29 done (83%)**
+`[████████████████████████░░░░░]`
 
 ⚠️ **Exam on Nov 1.** Plan: Oct 29 Task 3 + Jenkins install ✅ · Oct 30 CI + CD pipelines · Oct 31 webhook, demos, Task 4 docs · Nov 1 review only.
 
@@ -33,12 +33,12 @@
 - [x] Jenkins installed as code (Helm 5.10.2 + JCasC + 88 pinned plugins + PVC), clean reinstall verified
 - [x] Both jobs created from code (Job DSL)
 - [x] Install / configure / create-jobs / verify / uninstall scripts
-- [ ] Container registry (GHCR) token → `secrets/ghcr.env` *(your step)*
+- [x] Container registry (GHCR) token + images public
 
 **Oct 30 · Pipelines**
-- [ ] `Jenkinsfile-ci` working (test → build → scan → push)
-- [ ] `Jenkinsfile-cd` working (deploy → rollout → smoke test)
-- [ ] GitHub webhook triggers CI
+- [x] `Jenkinsfile-ci` working (CI #3: 8 tests, build, scan, push to GHCR, triggers CD)
+- [x] `Jenkinsfile-cd` working (CD #2: deployed fccdee2, verified, smoke test OK; CD #1 failed safely before deploy)
+- [ ] GitHub webhook triggers CI *(relay running + webhook added – needs a real push to prove)*
 
 **Oct 31 · Finish Task 4**
 - [ ] Failure demo + rollback demo

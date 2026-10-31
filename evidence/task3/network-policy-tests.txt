@@ -1,4 +1,4 @@
-NetworkPolicy tests - 2026-10-29 11:07
+NetworkPolicy tests - 2026-10-31 08:33
 Cluster: k3d-devops   Namespace: devops-app
 
 --- Entry point

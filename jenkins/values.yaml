@@ -222,9 +222,7 @@ agent:
                 resources:
                   requests: { cpu: 100m, memory: 256Mi }
                   limits: { cpu: 500m, memory: 512Mi }
-                securityContext: &restricted
-                  allowPrivilegeEscalation: false
-                  capabilities: { drop: ["ALL"] }
+                securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
               - name: python
                 image: python:3.12.16-slim
                 command: ["sleep"]
@@ -235,7 +233,7 @@ agent:
                 resources:
                   requests: { cpu: 200m, memory: 256Mi }
                   limits: { cpu: "1", memory: 1Gi }
-                securityContext: *restricted
+                securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
               - name: hadolint
                 image: hadolint/hadolint:v2.15.1-debian
                 command: ["sleep"]
@@ -243,7 +241,7 @@ agent:
                 resources:
                   requests: { cpu: 50m, memory: 64Mi }
                   limits: { cpu: 200m, memory: 128Mi }
-                securityContext: *restricted
+                securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
               # Rootless BuildKit: builds images WITHOUT the node's Docker socket
               # and without privileged mode. Trade-off: it needs an unconfined
               # seccomp/AppArmor profile to create its user namespace.
@@ -273,9 +271,9 @@ agent:
                 resources:
                   requests: { cpu: 200m, memory: 256Mi }
                   limits: { cpu: "1", memory: 1Gi }
-                securityContext: *restricted
+                securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
               - name: crane
-                image: gcr.io/go-containerregistry/crane:v0.22.1-debug
+                image: gcr.io/go-containerregistry/crane:debug@sha256:e78770b31258a3846f878036d9c1f63fbe4c871f9f56990bf77fd95c013e3c1b   # only a moving "debug" tag exists, so pinned by digest
                 command: ["/busybox/sleep"]
                 args: ["infinity"]
                 env:
@@ -283,7 +281,7 @@ agent:
                 resources:
                   requests: { cpu: 50m, memory: 64Mi }
                   limits: { cpu: 500m, memory: 256Mi }
-                securityContext: *restricted
+                securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
             volumes:
               - name: buildkitd
                 emptyDir: {}
@@ -314,9 +312,7 @@ agent:
                 resources:
                   requests: { cpu: 100m, memory: 256Mi }
                   limits: { cpu: 500m, memory: 512Mi }
-                securityContext: &restricted
-                  allowPrivilegeEscalation: false
-                  capabilities: { drop: ["ALL"] }
+                securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
               - name: k8s
                 image: alpine/k8s:1.35.9                  # kubectl + helm, same minor as the cluster
                 command: ["sleep"]
@@ -326,9 +322,9 @@ agent:
                 resources:
                   requests: { cpu: 100m, memory: 128Mi }
                   limits: { cpu: 500m, memory: 512Mi }
-                securityContext: *restricted
+                securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
               - name: crane
-                image: gcr.io/go-containerregistry/crane:v0.22.1-debug
+                image: gcr.io/go-containerregistry/crane:debug@sha256:e78770b31258a3846f878036d9c1f63fbe4c871f9f56990bf77fd95c013e3c1b   # only a moving "debug" tag exists, so pinned by digest
                 command: ["/busybox/sleep"]
                 args: ["infinity"]
                 env:
@@ -336,7 +332,7 @@ agent:
                 resources:
                   requests: { cpu: 50m, memory: 64Mi }
                   limits: { cpu: 200m, memory: 128Mi }
-                securityContext: *restricted
+                securityContext: { allowPrivilegeEscalation: false, capabilities: { drop: ["ALL"] } }
 
 # --- Storage: Jenkins home survives pod restarts --------------------------------
 persistence:
