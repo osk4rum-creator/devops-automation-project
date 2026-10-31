@@ -1,54 +1,56 @@
-# Jenkins installation - collected 2026-10-29 11:32
+# Jenkins installation - collected 2026-10-31 09:04
 
 $ kubectl get namespaces
 NAME              STATUS   AGE
-default           Active   3d7h
-devops-app        Active   2d21h
-jenkins           Active   59s
-kube-node-lease   Active   3d7h
-kube-public       Active   3d7h
-kube-system       Active   3d7h
+default           Active   5d4h
+devops-app        Active   4d18h
+jenkins           Active   45h
+kube-node-lease   Active   5d4h
+kube-public       Active   5d4h
+kube-system       Active   5d4h
 
 $ kubectl get pods -n jenkins -o wide
-NAME        READY   STATUS    RESTARTS   AGE   IP           NODE                 NOMINATED NODE   READINESS GATES
-jenkins-0   2/2     Running   0          54s   10.42.0.54   k3d-devops-agent-0   <none>           <none>
+NAME                                 READY   STATUS        RESTARTS   AGE     IP           NODE                 NOMINATED NODE   READINESS GATES
+application-cd-4-1t21b-9dptt-4wk4t   3/3     Terminating   0          68s     10.42.1.59   k3d-devops-agent-1   <none>           <none>
+jenkins-0                            2/2     Running       0          53m     10.42.0.55   k3d-devops-agent-0   <none>           <none>
+webhook-relay-5d7db568bc-tmwsk       1/1     Running       0          7m19s   10.42.1.58   k3d-devops-agent-1   <none>           <none>
 
 $ kubectl get service,ingress,pvc -n jenkins
 NAME                    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)     AGE
-service/jenkins         ClusterIP   10.43.30.144   <none>        8080/TCP    56s
-service/jenkins-agent   ClusterIP   10.43.203.75   <none>        50000/TCP   56s
+service/jenkins         ClusterIP   10.43.30.144   <none>        8080/TCP    45h
+service/jenkins-agent   ClusterIP   10.43.203.75   <none>        50000/TCP   45h
 
 NAME                                CLASS     HOSTS               ADDRESS                            PORTS   AGE
-ingress.networking.k8s.io/jenkins   traefik   jenkins.localhost   172.19.0.2,172.19.0.4,172.19.0.5   80      55s
+ingress.networking.k8s.io/jenkins   traefik   jenkins.localhost   172.19.0.2,172.19.0.4,172.19.0.5   80      45h
 
 NAME                            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
-persistentvolumeclaim/jenkins   Bound    pvc-c431fc34-7966-44d3-b390-829d90e3edd5   8Gi        RWO            local-path     <unset>                 56s
+persistentvolumeclaim/jenkins   Bound    pvc-c431fc34-7966-44d3-b390-829d90e3edd5   8Gi        RWO            local-path     <unset>                 45h
 
 $ kubectl get serviceaccount,role,rolebinding -n jenkins
 NAME                              AGE
-serviceaccount/default            60s
-serviceaccount/jenkins            56s
-serviceaccount/jenkins-agent-ci   59s
-serviceaccount/jenkins-deployer   59s
+serviceaccount/default            45h
+serviceaccount/jenkins            45h
+serviceaccount/jenkins-agent-ci   45h
+serviceaccount/jenkins-deployer   45h
 
 NAME                                                     CREATED AT
 role.rbac.authorization.k8s.io/jenkins-casc-reload       2026-10-29T09:31:31Z
 role.rbac.authorization.k8s.io/jenkins-schedule-agents   2026-10-29T09:31:31Z
 
 NAME                                                             ROLE                           AGE
-rolebinding.rbac.authorization.k8s.io/jenkins-schedule-agents    Role/jenkins-schedule-agents   56s
-rolebinding.rbac.authorization.k8s.io/jenkins-watch-configmaps   Role/jenkins-casc-reload       56s
+rolebinding.rbac.authorization.k8s.io/jenkins-schedule-agents    Role/jenkins-schedule-agents   45h
+rolebinding.rbac.authorization.k8s.io/jenkins-watch-configmaps   Role/jenkins-casc-reload       45h
 
 $ kubectl get role,rolebinding -n devops-app
 NAME                                              CREATED AT
 role.rbac.authorization.k8s.io/jenkins-deployer   2026-10-29T09:31:28Z
 
 NAME                                                     ROLE                    AGE
-rolebinding.rbac.authorization.k8s.io/jenkins-deployer   Role/jenkins-deployer   59s
+rolebinding.rbac.authorization.k8s.io/jenkins-deployer   Role/jenkins-deployer   45h
 
 $ helm list -n jenkins
 NAME   	NAMESPACE	REVISION	UPDATED                              	STATUS  	CHART         	APP VERSION
-jenkins	jenkins  	1       	2026-10-29 11:31:30.6164399 +0200 IST	deployed	jenkins-5.10.2	2.580.2    
+jenkins	jenkins  	3       	2026-10-31 08:20:13.2768079 +0200 IST	deployed	jenkins-5.10.2	2.580.2    
 
 --- checks
 PASS  controller pod is Ready

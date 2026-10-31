@@ -1,0 +1,42 @@
+# Rollback demo - 2026-10-31 09:05
+
+Scenario: version 7977849 (CD #4) is deployed; we roll back to the previous release (6af8bef, deployed by CD #3).
+
+$ helm history devops-app -n devops-app --max 4
+REVISION	UPDATED                 	STATUS    	CHART           	APP VERSION	DESCRIPTION     
+8       	Thu Oct 29 10:35:58 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
+9       	Sat Oct 31 06:32:40 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
+10      	Sat Oct 31 06:42:22 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
+11      	Sat Oct 31 07:04:07 2026	deployed  	devops-app-0.1.0	1.0.0      	Upgrade complete
+
+## Before: running images
+backend	ghcr.io/osk4rum-creator/devops-app/backend:7977849
+frontend	ghcr.io/osk4rum-creator/devops-app/frontend:7977849
+worker	ghcr.io/osk4rum-creator/devops-app/worker:7977849
+
+$ helm rollback devops-app 10 -n devops-app --wait
+Rollback was a success! Happy Helming!
+
+$ kubectl rollout status deployment/frontend -n devops-app
+deployment "frontend" successfully rolled out
+$ kubectl rollout status deployment/backend -n devops-app
+deployment "backend" successfully rolled out
+$ kubectl rollout status deployment/worker -n devops-app
+deployment "worker" successfully rolled out
+
+## After: running images
+backend	ghcr.io/osk4rum-creator/devops-app/backend:6af8bef
+frontend	ghcr.io/osk4rum-creator/devops-app/frontend:6af8bef
+worker	ghcr.io/osk4rum-creator/devops-app/worker:6af8bef
+
+## App still healthy after rollback:
+$ curl http://localhost:8080/api/health
+{"status":"ready"}
+
+notes still in DB: 6
+
+$ helm history devops-app -n devops-app --max 3
+REVISION	UPDATED                 	STATUS    	CHART           	APP VERSION	DESCRIPTION     
+10      	Sat Oct 31 06:42:22 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
+11      	Sat Oct 31 07:04:07 2026	superseded	devops-app-0.1.0	1.0.0      	Upgrade complete
+12      	Sat Oct 31 09:05:42 2026	deployed  	devops-app-0.1.0	1.0.0      	Rollback to 10  

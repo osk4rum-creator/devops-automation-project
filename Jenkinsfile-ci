@@ -37,8 +37,10 @@ pipeline {
         stage('Checkout') {
             steps {
                 container('jnlp') {
-                    checkout scm
                     script {
+                        // checkout returns what it checked out (branch, commit, ...)
+                        def scmVars = checkout scm
+                        env.GIT_BRANCH = scmVars.GIT_BRANCH
                         // Immutable tag = short commit SHA. Never "latest".
                         env.IMAGE_TAG = sh(script: 'git rev-parse --short=7 HEAD', returnStdout: true).trim()
                         env.GIT_SHA   = sh(script: 'git rev-parse HEAD', returnStdout: true).trim()

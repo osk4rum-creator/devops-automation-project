@@ -1,0 +1,5 @@
+# Images in GHCR for tag 7977849 (public, anonymous read) - collected 2026-10-31 09:05
+
+ghcr.io/osk4rum-creator/devops-app/frontend:7977849  ->  sha256:0d79641ca1b20b1ba9fb02b9ddcc53d034ad57df38af6681a7d9125f0b06d279
+ghcr.io/osk4rum-creator/devops-app/backend:7977849  ->  sha256:3e7c2868a81dacc9151a1244059d3051a9bee2ca716b4b51418e429ddee596b5
+ghcr.io/osk4rum-creator/devops-app/worker:7977849  ->  sha256:7658650178da6477e34db06c71a2d85b3646b16f7129b9fac93cbd006ddec659

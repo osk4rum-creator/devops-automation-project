@@ -1,7 +1,7 @@
 # Project progress – Tasks 3 & 4
 
-**Overall: 24 / 29 done (83%)**
-`[████████████████████████░░░░░]`
+**Overall: 25 / 29 done (86%)**
+`[█████████████████████████░░░░]`
 
 ⚠️ **Exam on Nov 1.** Plan: Oct 29 Task 3 + Jenkins install ✅ · Oct 30 CI + CD pipelines · Oct 31 webhook, demos, Task 4 docs · Nov 1 review only.
 
@@ -38,10 +38,10 @@
 **Oct 30 · Pipelines**
 - [x] `Jenkinsfile-ci` working (CI #3: 8 tests, build, scan, push to GHCR, triggers CD)
 - [x] `Jenkinsfile-cd` working (CD #2: deployed fccdee2, verified, smoke test OK; CD #1 failed safely before deploy)
-- [ ] GitHub webhook triggers CI *(relay running + webhook added – needs a real push to prove)*
+- [x] GitHub webhook triggers CI (push → CI #5 → CD #4 fully automatic)
 
 **Oct 31 · Finish Task 4**
-- [ ] Failure demo + rollback demo
+- [ ] Failure demo + rollback demo *(rollback ✅ done – failure demo next)*
 - [ ] Task 4 evidence collected
 - [ ] README + 2 diagrams, **Task 4 ready to submit** 🎯
 
