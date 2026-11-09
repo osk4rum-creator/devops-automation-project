@@ -21,7 +21,7 @@ inside the cluster (Task 4).
 ### Highlights
 - **Product:** monitors with live status, sparklines, 24h uptime, response-time chart, incident timeline, CSV reports in S3, light/dark mode, works on mobile.
 - **Kubernetes:** Helm chart, 2 replicas of frontend and backend, StatefulSet database with persistent storage, readiness/liveness probes, rolling updates, self-healing.
-- **Public demo:** shared over HTTPS through a **Cloudflare Tunnel** (no open ports) in **read-only mode** - visitors can look, only the admin token can change anything.
+- **Read-only demo mode:** visitors can look, only the admin token can change anything. Optional public sharing over HTTPS through a **Cloudflare Tunnel** (no open ports), off by default.
 - **Security:** default-deny NetworkPolicies, non-root read-only containers, **3-layer SSRF protection**, strict Content-Security-Policy, least-privilege IAM, no secrets in Git, Trivy image scanning.
 - **CI/CD:** Jenkins as code (Helm + JCasC + Job DSL), push-triggered CI (lint → 49 tests → build → scan → push), separate CD with immutable tags, smoke tests, rollback, full traceability.
 
@@ -372,7 +372,10 @@ and the Secret would disappear.
 | What restricts access? | NetworkPolicies (the in-cluster equivalent of the Security Groups used for RDS in Task 2) |
 | Why not RDS? | Practice setup without AWS budget. In production RDS is better: managed backups, Multi-AZ failover, patching, no container image to maintain. Switching = `postgres.enabled=false` + RDS endpoint in `DB_HOST` + RDS security group allowing the node group |
 
-## 8.1 Public demo: Cloudflare Tunnel + read-only mode
+## 8.1 Read-only mode and optional public demo (Cloudflare Tunnel)
+
+The app normally runs **locally only** (http://localhost:8080). Read-only mode is always on;
+the tunnel is an optional extra for sharing a live demo, started only on demand.
 
 ```
 visitor --HTTPS--> https://<random>.trycloudflare.com   (Cloudflare edge, valid certificate)
@@ -646,11 +649,11 @@ Started automatically by CI, or manually with **Build with Parameters**.
 ## 12.7 Traceability (real example from the evidence)
 
 ```
-commit f477fca  (git revert of the failure demo)
-  └─ application-ci #8   "Started by GitHub push by osk4rum-creator"
-       └─ images ghcr.io/osk4rum-creator/devops-app/{frontend,backend,worker}:f477fca  (+ sha256 digests)
-            └─ application-cd #6   "Started by upstream project application-ci build number 8"
-                 └─ helm revision · all Deployments run :f477fca · smoke test OK
+commit d8e8f42  (StatusPulse: uptime monitor, read-only demo mode)
+  └─ application-ci #10  "Started by GitHub push by osk4rum-creator" · 49/49 tests
+       └─ images ghcr.io/osk4rum-creator/devops-app/{frontend,backend,worker}:d8e8f42  (+ sha256 digests)
+            └─ application-cd #9   "Started by upstream project application-ci build number 10"
+                 └─ helm revision · all Deployments run :d8e8f42 · smoke test OK
 ```
 From any CD build you can open the CI build (`CI_BUILD` parameter), see the commit, and
 match the digests in `build-metadata.json` against GHCR ([`03-registry.txt`](evidence/task4/03-registry.txt)).
@@ -693,10 +696,10 @@ Regenerate with `./scripts/verify-jenkins.sh` and `./scripts/collect-evidence-ta
 | File | Shows |
 |---|---|
 | [`01-jenkins-install.txt`](evidence/task4/01-jenkins-install.txt) | `kubectl get` for jenkins namespace, SA/Role/RoleBinding, `helm list`; 10 checks: controller Ready, PVC bound, 0 executors, both jobs from Job DSL, 4 RBAC checks |
-| [`02-ci-run.txt`](evidence/task4/02-ci-run.txt) | CI #8: started by GitHub push, every stage + duration, 8/8 tests, unique tag, image digests, agent pod created and gone afterwards |
+| [`02-ci-run.txt`](evidence/task4/02-ci-run.txt) | CI #10: started by GitHub push, every stage + duration, 49/49 tests, unique tag, image digests, agent pod created and gone afterwards |
 | [`ci-trivy-*.txt`](evidence/task4/) | Trivy reports archived by the CI build |
 | [`03-registry.txt`](evidence/task4/03-registry.txt) | The images exist in GHCR with the same digests CI recorded |
-| [`04-cd-run.txt`](evidence/task4/04-cd-run.txt) | CD #6: started by CI #8, parameters, stages, `kubectl get deployments,pods,services,ingress`, `rollout status`, pod images, events, helm history, running = CI tag |
+| [`04-cd-run.txt`](evidence/task4/04-cd-run.txt) | CD #9: started by CI #10, parameters, stages, `kubectl get deployments,pods,services,ingress`, `rollout status`, pod images, events, helm history, running = CI tag |
 | [`05-rollback.txt`](evidence/task4/05-rollback.txt) | `helm rollback` to the previous release, rollout, app healthy, data intact |
 | [`06-failure-demo.txt`](evidence/task4/06-failure-demo.txt) | Intentional bug: CI #7 stopped at Test, no image in GHCR, CD not triggered, app untouched |
 | [`07-jenkins-network-policy.txt`](evidence/task4/07-jenkins-network-policy.txt) | UI, relay and agents allowed; pods from other namespaces blocked |

@@ -1,52 +1,84 @@
-# Application tests - collected 2026-10-29 11:06
+# Application tests - StatusPulse - collected 2026-11-10 00:01
 
-$ curl -s -o /dev/null -w HTTP %{http_code} from the web page through the Ingress\n http://localhost:8080/
-HTTP 200 from the web page through the Ingress
+$ curl -s -o evidence/task3/.page.html -w HTTP %{http_code} from the dashboard through the Ingress\n http://localhost:8080/
+HTTP 200 from the dashboard through the Ingress
 
 $ curl -s http://localhost:8080/api/health
 {"status":"ready"}
+
+$ curl -s http://localhost:8080/api/version
+{"pod":"backend-64cb9cfb9b-wzxvp","read_only":true,"s3_enabled":true,"version":"d8e8f42"}
 
 ## frontend -> backend (from inside a frontend pod)
 $ kubectl exec -n devops-app deploy/frontend -- wget -qO- http://backend:8000/healthz
 {"status":"ok"}
 
-## write to the database through the API
-$ curl -s -X POST -H Content-Type: application/json -d {"text":"evidence note 11:06:23"} http://localhost:8080/api/notes
-{"id":6,"text":"evidence note 11:06:23"}
+## write: add a monitor through the API (stored in PostgreSQL)
+## read-only demo mode: the same request WITHOUT the admin token is refused
+$ curl -s -X POST -H Content-Type: application/json -d {"name":"Evidence check","url":"https://example.com","interval_seconds":30} http://localhost:8080/api/monitors
+{"error":"read-only demo: unlock with the admin token to make changes"}
 
-## read it back through the API
-$ curl -s http://localhost:8080/api/notes
-[{"created_at":"2026-10-29T09:06:24.003290+00:00","id":6,"text":"evidence note 11:06:23"},{"created_at":"2026-10-29T08:46:22.264669+00:00","id":5,"text":"evidence note 10:46:21"},{"created_at":"2026-10-29T08:40:42.438293+00:00","id":4,"text":"evidence note 10:40:41"},{"created_at":"2026-10-29T08:39:03.040455+00:00","id":3,"text":"evidence note 10:39:02"},{"created_at":"2026-10-28T11:22:36.045016+00:00","id":2,"text":"test"},{"created_at":"2026-10-26T12:11:01.946031+00:00","id":1,"text":"first note from Kubernetes"}]
+## ...and accepted WITH the token (sent as Authorization header, not shown)
+$ acurl -s -X POST -H Content-Type: application/json -d {"name":"Evidence check","url":"https://example.com","interval_seconds":30} http://localhost:8080/api/monitors
+{"consecutive_failures":0,"created_at":"2026-11-09T22:01:31.273995+00:00","id":7,"interval_seconds":30,"last_checked_at":null,"last_error":null,"last_response_ms":null,"name":"Evidence check","paused":false,"status":"pending","status_since":"2026-11-09T22:01:31.273995+00:00","url":"https://example.com"}
 
-## confirm it is stored in PostgreSQL
-$ psql_q SELECT id, text, created_at FROM notes ORDER BY id DESC LIMIT 3;
- id |          text          |          created_at           
-----+------------------------+-------------------------------
-  6 | evidence note 11:06:23 | 2026-10-29 09:06:24.00329+00
-  5 | evidence note 10:46:21 | 2026-10-29 08:46:22.264669+00
-  4 | evidence note 10:40:41 | 2026-10-29 08:40:42.438293+00
-(3 rows)
+## SSRF protection: internal targets are rejected
+$ acurl -s -X POST -H Content-Type: application/json -d {"name":"attack","url":"http://169.254.169.254/latest/meta-data"} http://localhost:8080/api/monitors
+{"error":"private, loopback and link-local addresses are not allowed"}
 
+$ acurl -s -X POST -H Content-Type: application/json -d {"name":"attack","url":"http://postgres:5432"} http://localhost:8080/api/monitors
+{"error":"internal host names are not allowed"}
 
-## worker picks up a new upload row (SNS disabled: AWS account blocked, see README)
-$ psql_q INSERT INTO uploads (filename, s3_key) VALUES ('evidence.txt', 'uploads/evidence.txt');
-INSERT 0 1
+$ acurl -s -X POST -H Content-Type: application/json -d {"name":"attack","url":"http://10.43.0.10"} http://localhost:8080/api/monitors
+{"error":"private, loopback and link-local addresses are not allowed"}
 
-$ kubectl logs deploy/worker -n devops-app --tail=3
+$ acurl -s -X POST -H Content-Type: application/json -d {"name":"attack","url":"file:///etc/passwd"} http://localhost:8080/api/monitors
+{"error":"only http:// and https:// URLs can be monitored"}
+
+## worker checks the sites (waiting up to 60s for the new monitor's first check)
+## read: monitors with status, last response time and 24h uptime
+  Cloudflare           up       last=174 ms  uptime24h=100.0%  checks=10  
+  Broken demo site     down     last=None ms  uptime24h=0.0%  checks=19  DNS lookup failed (Name or service not known)
+  GitHub               up       last=20 ms  uptime24h=100.0%  checks=19  
+  Google               up       last=229 ms  uptime24h=100.0%  checks=19  
+  Example.com          up       last=66 ms  uptime24h=100.0%  checks=19  
+  Evidence check       up       last=16 ms  uptime24h=100.0%  checks=1  
+$ curl -s http://localhost:8080/api/summary
+{"avg_response_ms":104.91,"checks_24h":87,"down":1,"open_incidents":1,"paused":0,"pending":0,"total":6,"up":5,"uptime_24h":78.16}
+
+## incidents (opened by the worker, SNS email sent on DOWN / RECOVERED)
+$ curl -s http://localhost:8080/api/incidents
+[{"cause":"DNS lookup failed (Name or service not known)","id":1,"monitor_id":4,"monitor_name":"Broken demo site","resolved_at":null,"started_at":"2026-11-07T01:05:18.387088+00:00"}]
+
+$ kubectl logs deploy/worker -n devops-app --tail=8
+2026-11-09 21:58:57,680 INFO Found credentials in environment variables.
+2026-11-09 21:58:58,010 INFO worker started: tick 5s, timeout 10.0s, down after 2 failures
+2026-11-09 21:59:48,386 INFO checked 4 monitor(s)
+2026-11-09 22:00:03,429 INFO checked 1 monitor(s)
+2026-11-09 22:00:13,440 ERROR tick failed: connection failed: connection to server at "10.43.172.66", port 5432 failed: Connection refused
 	Is the server running on that host and accepting TCP/IP connections?
-2026-10-29 08:46:24,239 INFO SNS not configured, would send: New file uploaded: evidence.txt (s3:///uploads/evidence.txt)
-2026-10-29 09:06:25,189 INFO SNS not configured, would send: New file uploaded: evidence.txt (s3:///uploads/evidence.txt)
+2026-11-09 22:00:48,788 INFO checked 5 monitor(s)
+2026-11-09 22:01:33,893 INFO checked 1 monitor(s)
 
-$ psql_q SELECT id, filename, notified FROM uploads ORDER BY id DESC LIMIT 3;
- id |   filename   | notified 
-----+--------------+----------
-  4 | evidence.txt | t
-  3 | evidence.txt | t
-  2 | evidence.txt | t
-(3 rows)
+## stored in PostgreSQL
+$ psql_q SELECT m.name, count(c.id) AS checks, round(avg(c.ok::int)*100, 1) AS uptime_pct FROM monitors m LEFT JOIN checks c ON c.monitor_id = m.id GROUP BY m.name ORDER BY m.name;
+       name       | checks | uptime_pct 
+------------------+--------+------------
+ Broken demo site |     86 |        0.0
+ Cloudflare       |     44 |      100.0
+ Evidence check   |      1 |      100.0
+ Example.com      |     83 |      100.0
+ GitHub           |     86 |      100.0
+ Google           |     86 |      100.0
+(6 rows)
 
 
-## S3 upload while AWS credentials are absent -> clear error, no crash
-$ curl -s -F file=@evidence/task3/.upload-test.txt http://localhost:8080/api/upload
-{"error":"S3 is not configured (S3_BUCKET is empty)"}
-
+## S3: export a report (private bucket, presigned link valid 1h)
+  s3 key: uploads/reports/statuspulse-20261109-220137-9cdfa44b.csv
+  presigned link: True
+## download through the presigned link (first lines of the CSV):
+monitor,url,status,paused,uptime_24h_percent,avg_response_ms,checks_24h,incidents_24h
+Broken demo site,https://statuspulse-demo.invalid,down,False,0.00,,19,0
+Cloudflare,https://www.cloudflare.com,up,False,100.00,228,10,0
+Evidence check,https://example.com,up,False,100.00,16,1,0
+## same object WITHOUT the link (bucket is private): HTTP 403

@@ -1,4 +1,4 @@
-# Container security checks - collected 2026-10-29 11:07
+# Container security checks - collected 2026-11-10 00:01
 
 ## frontend
 $ kubectl exec -n devops-app deploy/frontend -- id
@@ -36,22 +36,22 @@ no Kubernetes API token mounted (expected)
 ## securityContext of every pod
 $ kubectl get pods -n devops-app -o custom-columns=POD:.metadata.name,SA:.spec.serviceAccountName,RUN_AS_USER:.spec.securityContext.runAsUser,NON_ROOT:.spec.securityContext.runAsNonRoot,READ_ONLY_FS:.spec.containers[0].securityContext.readOnlyRootFilesystem,PRIV_ESC:.spec.containers[0].securityContext.allowPrivilegeEscalation,CAPS_DROP:.spec.containers[0].securityContext.capabilities.drop
 POD                         SA         RUN_AS_USER   NON_ROOT   READ_ONLY_FS   PRIV_ESC   CAPS_DROP
-backend-75997d9c94-bm98c    backend    10001         true       true           false      [ALL]
-backend-75997d9c94-t44sc    backend    10001         true       true           false      [ALL]
-frontend-6b9ddd5d89-4dzzz   frontend   101           true       true           false      [ALL]
-frontend-6b9ddd5d89-dvgmj   frontend   101           true       true           false      [ALL]
+backend-64cb9cfb9b-q4cn5    backend    10001         true       true           false      [ALL]
+backend-64cb9cfb9b-xxmmn    backend    10001         true       true           false      [ALL]
+frontend-6d99cc4b77-7bn6b   frontend   101           true       true           false      [ALL]
+frontend-6d99cc4b77-crpqr   frontend   101           true       true           false      [ALL]
 postgres-0                  postgres   70            true       true           false      [ALL]
-worker-59bdf766d5-qnmhq     worker     10001         true       true           false      [ALL]
+worker-bf59788c7-2gvpv      worker     10001         true       true           false      [ALL]
 
 ## images in use (pinned git-SHA tags, never latest)
 $ kubectl get pods -n devops-app -o jsonpath={range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}
-backend-75997d9c94-bm98c	devops-app/backend:088d40c
-backend-75997d9c94-t44sc	devops-app/backend:088d40c
-frontend-6b9ddd5d89-4dzzz	devops-app/frontend:088d40c
-frontend-6b9ddd5d89-dvgmj	devops-app/frontend:088d40c
+backend-64cb9cfb9b-q4cn5	ghcr.io/osk4rum-creator/devops-app/backend:d8e8f42
+backend-64cb9cfb9b-xxmmn	ghcr.io/osk4rum-creator/devops-app/backend:d8e8f42
+frontend-6d99cc4b77-7bn6b	ghcr.io/osk4rum-creator/devops-app/frontend:d8e8f42
+frontend-6d99cc4b77-crpqr	ghcr.io/osk4rum-creator/devops-app/frontend:d8e8f42
 postgres-0	postgres:17.11-alpine
-worker-59bdf766d5-qnmhq	devops-app/worker:088d40c
+worker-bf59788c7-2gvpv	ghcr.io/osk4rum-creator/devops-app/worker:d8e8f42
 
 ## the ConfigMap holds no secrets
 $ kubectl get configmap app-config -n devops-app -o jsonpath={.data}
-{"AWS_REGION":"eu-central-1","DB_HOST":"postgres","DB_NAME":"appdb","DB_PORT":"5432","POLL_SECONDS":"10","S3_BUCKET":"","SNS_TOPIC_ARN":""}
+{"AWS_REGION":"eu-central-1","CHECK_TIMEOUT_SECONDS":"10","DB_HOST":"postgres","DB_NAME":"appdb","DB_PORT":"5432","FAILURES_BEFORE_DOWN":"2","POLL_SECONDS":"5","RETENTION_DAYS":"7","S3_BUCKET":"devops-app-uploads-890319879195","SEED_DEMO":"true","SNS_TOPIC_ARN":"arn:aws:sns:eu-central-1:890319879195:devops-app-uploads"}

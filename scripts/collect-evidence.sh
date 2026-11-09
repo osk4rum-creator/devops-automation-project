@@ -18,6 +18,13 @@ run() {
 }
 start() { echo "# $2 - collected $(date '+%Y-%m-%d %H:%M')" > "$OUT/$1"; echo >> "$OUT/$1"; echo "  -> $OUT/$1"; }
 
+# Read-only demo mode: send the admin token (from the gitignored file) on changes.
+# Only the header is passed to curl - the token itself never appears in the evidence.
+AUTH=()
+if [ -f secrets/admin.env ]; then AUTH=(-H "Authorization: Bearer $(sed -n 's/^token=//p' secrets/admin.env)"); fi
+# run() logs the command line, so authenticated calls go through this wrapper instead
+acurl() { curl "${AUTH[@]}" "$@"; }
+
 pod_of() { kubectl get pod -n $NS -l "app.kubernetes.io/name=$1" -o jsonpath='{.items[0].metadata.name}'; }
 psql_q() { kubectl exec -n $NS postgres-0 -- sh -c "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -c \"$1\""; }
 
@@ -52,10 +59,13 @@ run 04-app-tests.txt curl -s http://localhost:8080/api/version
 echo "## frontend -> backend (from inside a frontend pod)" >> "$OUT/04-app-tests.txt"
 run 04-app-tests.txt kubectl exec -n $NS deploy/frontend -- wget -qO- http://backend:8000/healthz
 echo "## write: add a monitor through the API (stored in PostgreSQL)" >> "$OUT/04-app-tests.txt"
+echo "## read-only demo mode: the same request WITHOUT the admin token is refused" >> "$OUT/04-app-tests.txt"
 run 04-app-tests.txt curl -s -X POST -H "Content-Type: application/json" -d '{"name":"Evidence check","url":"https://example.com","interval_seconds":30}' http://localhost:8080/api/monitors
+echo "## ...and accepted WITH the token (sent as Authorization header, not shown)" >> "$OUT/04-app-tests.txt"
+run 04-app-tests.txt acurl -s -X POST -H "Content-Type: application/json" -d '{"name":"Evidence check","url":"https://example.com","interval_seconds":30}' http://localhost:8080/api/monitors
 echo "## SSRF protection: internal targets are rejected" >> "$OUT/04-app-tests.txt"
 for u in http://169.254.169.254/latest/meta-data http://postgres:5432 http://10.43.0.10 file:///etc/passwd; do
-  run 04-app-tests.txt curl -s -X POST -H "Content-Type: application/json" -d "{\"name\":\"attack\",\"url\":\"$u\"}" http://localhost:8080/api/monitors
+  run 04-app-tests.txt acurl -s -X POST -H "Content-Type: application/json" -d "{\"name\":\"attack\",\"url\":\"$u\"}" http://localhost:8080/api/monitors
 done
 echo "## worker checks the sites (waiting up to 60s for the new monitor's first check)" >> "$OUT/04-app-tests.txt"
 for i in $(seq 1 12); do
@@ -74,16 +84,17 @@ run 04-app-tests.txt kubectl logs deploy/worker -n $NS --tail=8
 echo "## stored in PostgreSQL" >> "$OUT/04-app-tests.txt"
 run 04-app-tests.txt psql_q "SELECT m.name, count(c.id) AS checks, round(avg(c.ok::int)*100, 1) AS uptime_pct FROM monitors m LEFT JOIN checks c ON c.monitor_id = m.id GROUP BY m.name ORDER BY m.name;"
 echo "## S3: export a report (private bucket, presigned link valid 1h)" >> "$OUT/04-app-tests.txt"
-REPORT=$(curl -s -X POST http://localhost:8080/api/reports)
+REPORT=$(acurl -s -X POST http://localhost:8080/api/reports)
 echo "$REPORT" | python -c "import sys,json; d=json.load(sys.stdin); print('  s3 key:', d.get('s3_key', d)); print('  presigned link:', 'X-Amz-Signature' in d.get('url',''))" >> "$OUT/04-app-tests.txt"
 URL=$(echo "$REPORT" | python -c "import sys,json; print(json.load(sys.stdin).get('url',''))")
 echo "## download through the presigned link (first lines of the CSV):" >> "$OUT/04-app-tests.txt"
 curl -s "$URL" | head -4 >> "$OUT/04-app-tests.txt"
 KEY=$(echo "$REPORT" | python -c "import sys,json; print(json.load(sys.stdin).get('s3_key',''))")
-echo "## same object WITHOUT the link (bucket is private): HTTP $(curl -s -w '%{http_code}' https://devops-app-uploads-890319879195.s3.eu-central-1.amazonaws.com/$KEY > "$OUT/.s3.txt"; rm -f "$OUT/.s3.txt")" >> "$OUT/04-app-tests.txt"
+CODE=$(curl -s -o "$OUT/.s3.txt" -w '%{http_code}' "https://devops-app-uploads-890319879195.s3.eu-central-1.amazonaws.com/$KEY"); rm -f "$OUT/.s3.txt"
+echo "## same object WITHOUT the link (bucket is private): HTTP $CODE" >> "$OUT/04-app-tests.txt"
 # clean up the evidence monitor
 ID=$(curl -s http://localhost:8080/api/monitors | python -c "import sys,json; print(next((m['id'] for m in json.load(sys.stdin) if m['name']=='Evidence check'), ''))")
-[ -n "$ID" ] && curl -s -X DELETE http://localhost:8080/api/monitors/$ID > /dev/null
+[ -n "$ID" ] && acurl -s -X DELETE http://localhost:8080/api/monitors/$ID > /dev/null
 rm -f "$OUT/.page.html"
 
 # --- 3. Self-healing: delete pods, the system keeps working ---------------------------

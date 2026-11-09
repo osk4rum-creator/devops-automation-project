@@ -1,32 +1,32 @@
-# kubectl describe for each component - collected 2026-10-29 11:06
+# kubectl describe for each component - collected 2026-11-10 00:01
 
-$ kubectl describe pod frontend-6b9ddd5d89-4dzzz -n devops-app
-Name:             frontend-6b9ddd5d89-4dzzz
+$ kubectl describe pod frontend-6d99cc4b77-7bn6b -n devops-app
+Name:             frontend-6d99cc4b77-7bn6b
 Namespace:        devops-app
 Priority:         0
 Service Account:  frontend
-Node:             k3d-devops-agent-0/172.19.0.2
-Start Time:       Thu, 29 Oct 2026 10:36:00 +0200
+Node:             k3d-devops-agent-1/172.19.0.4
+Start Time:       Mon, 09 Nov 2026 23:58:48 +0200
 Labels:           app.kubernetes.io/managed-by=Helm
                   app.kubernetes.io/name=frontend
                   app.kubernetes.io/part-of=devops-app
-                  pod-template-hash=6b9ddd5d89
+                  pod-template-hash=6d99cc4b77
 Annotations:      kubectl.kubernetes.io/restartedAt: 2026-10-28T13:15:12+02:00
 Status:           Running
 SeccompProfile:   RuntimeDefault
-IP:               10.42.0.48
+IP:               10.42.1.101
 IPs:
-  IP:           10.42.0.48
-Controlled By:  ReplicaSet/frontend-6b9ddd5d89
+  IP:           10.42.1.101
+Controlled By:  ReplicaSet/frontend-6d99cc4b77
 Containers:
   frontend:
-    Container ID:   containerd://715e4d5c7380128e9b167a3b621d8096b752659c89df389428599074b838203f
-    Image:          devops-app/frontend:088d40c
-    Image ID:       sha256:080a1142018eec984085e9597da6e2a7b143fc677b5b1cf7e706a9f72405164d
+    Container ID:   containerd://9cbe47e2b4933768d45d3c1629790164b23ed4f14252c5f876dfc67caffa7628
+    Image:          ghcr.io/osk4rum-creator/devops-app/frontend:d8e8f42
+    Image ID:       ghcr.io/osk4rum-creator/devops-app/frontend@sha256:2a058edc2fd784a0366ec104f22d9259fc555589c7f10f8c1854978144c2bd38
     Port:           8080/TCP (http)
     Host Port:      0/TCP (http)
     State:          Running
-      Started:      Thu, 29 Oct 2026 10:36:00 +0200
+      Started:      Mon, 09 Nov 2026 23:58:53 +0200
     Ready:          True
     Restart Count:  0
     Limits:
@@ -63,40 +63,41 @@ Node-Selectors:  <none>
 Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
                  node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:
-  Type    Reason     Age   From               Message
-  ----    ------     ----  ----               -------
-  Normal  Scheduled  30m   default-scheduler  Successfully assigned devops-app/frontend-6b9ddd5d89-4dzzz to k3d-devops-agent-0
-  Normal  Pulled     30m   kubelet            spec.containers{frontend}: Container image "devops-app/frontend:088d40c" already present on machine and can be accessed by the pod
-  Normal  Created    30m   kubelet            spec.containers{frontend}: Container created
-  Normal  Started    30m   kubelet            spec.containers{frontend}: Container started
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  2m39s  default-scheduler  Successfully assigned devops-app/frontend-6d99cc4b77-7bn6b to k3d-devops-agent-1
+  Normal  Pulling    2m39s  kubelet            spec.containers{frontend}: Pulling image "ghcr.io/osk4rum-creator/devops-app/frontend:d8e8f42"
+  Normal  Pulled     2m34s  kubelet            spec.containers{frontend}: Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/frontend:d8e8f42" in 4.913s (4.913s including waiting). Image size: 27889842 bytes.
+  Normal  Created    2m34s  kubelet            spec.containers{frontend}: Container created
+  Normal  Started    2m34s  kubelet            spec.containers{frontend}: Container started
 
-$ kubectl describe pod backend-75997d9c94-jwjtw -n devops-app
-Name:             backend-75997d9c94-jwjtw
+$ kubectl describe pod backend-64cb9cfb9b-rzncs -n devops-app
+Name:             backend-64cb9cfb9b-rzncs
 Namespace:        devops-app
 Priority:         0
 Service Account:  backend
-Node:             k3d-devops-agent-1/172.19.0.4
-Start Time:       Thu, 29 Oct 2026 10:46:39 +0200
+Node:             k3d-devops-server-0/172.19.0.5
+Start Time:       Tue, 10 Nov 2026 00:00:08 +0200
 Labels:           app.kubernetes.io/managed-by=Helm
                   app.kubernetes.io/name=backend
                   app.kubernetes.io/part-of=devops-app
-                  pod-template-hash=75997d9c94
-Annotations:      checksum/config: 48e67e93d11e72b980da65be0500520a707f4c94ea6f6bebc7e716c43eb70ed0
+                  pod-template-hash=64cb9cfb9b
+Annotations:      checksum/config: e74a6c22bc960b5fe5bf635bf25f14ccef9cd09b2b199c53859bbfa7699a7f6b
 Status:           Running
 SeccompProfile:   RuntimeDefault
-IP:               10.42.1.45
+IP:               10.42.2.90
 IPs:
-  IP:           10.42.1.45
-Controlled By:  ReplicaSet/backend-75997d9c94
+  IP:           10.42.2.90
+Controlled By:  ReplicaSet/backend-64cb9cfb9b
 Containers:
   backend:
-    Container ID:   containerd://99ea8301320c5b959fef59117ca347402be68b480470f0c6be83634e19fbb913
-    Image:          devops-app/backend:088d40c
-    Image ID:       sha256:951adf367322d3bfa4ca381d4cee5870840609e0272229df5c7a0bb53d97e2aa
+    Container ID:   containerd://a90f2ca1d6e19014c0130b996643375731061487b32ea8f08559fd332dd15135
+    Image:          ghcr.io/osk4rum-creator/devops-app/backend:d8e8f42
+    Image ID:       ghcr.io/osk4rum-creator/devops-app/backend@sha256:b6da3265b3836fcc4379ef27aa90b2f0afb47d568e57445f89216e123a4327bf
     Port:           8000/TCP (http)
     Host Port:      0/TCP (http)
     State:          Running
-      Started:      Thu, 29 Oct 2026 10:46:40 +0200
+      Started:      Tue, 10 Nov 2026 00:00:09 +0200
     Ready:          True
     Restart Count:  0
     Limits:
@@ -111,7 +112,10 @@ Containers:
       app-config       ConfigMap  Optional: false
       db-credentials   Secret     Optional: false
       aws-credentials  Secret     Optional: true
-    Environment:       <none>
+    Environment:
+      APP_VERSION:  d8e8f42
+      POD_NAME:     backend-64cb9cfb9b-rzncs (v1:metadata.name)
+      ADMIN_TOKEN:  <set to the key 'token' in secret 'app-admin'>  Optional: true
     Mounts:
       /tmp from tmp (rw)
 Conditions:
@@ -131,40 +135,41 @@ Node-Selectors:  <none>
 Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
                  node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:
-  Type    Reason     Age   From               Message
-  ----    ------     ----  ----               -------
-  Normal  Scheduled  19m   default-scheduler  Successfully assigned devops-app/backend-75997d9c94-jwjtw to k3d-devops-agent-1
-  Normal  Pulled     19m   kubelet            spec.containers{backend}: Container image "devops-app/backend:088d40c" already present on machine and can be accessed by the pod
-  Normal  Created    19m   kubelet            spec.containers{backend}: Container created
-  Normal  Started    19m   kubelet            spec.containers{backend}: Container started
+  Type     Reason     Age   From               Message
+  ----     ------     ----  ----               -------
+  Normal   Scheduled  78s   default-scheduler  Successfully assigned devops-app/backend-64cb9cfb9b-rzncs to k3d-devops-server-0
+  Normal   Pulled     78s   kubelet            spec.containers{backend}: Container image "ghcr.io/osk4rum-creator/devops-app/backend:d8e8f42" already present on machine and can be accessed by the pod
+  Normal   Created    78s   kubelet            spec.containers{backend}: Container created
+  Normal   Started    78s   kubelet            spec.containers{backend}: Container started
+  Warning  Unhealthy  78s   kubelet            spec.containers{backend}: Readiness probe failed: Get "http://10.42.2.90:8000/readyz": dial tcp 10.42.2.90:8000: connect: connection refused
 
-$ kubectl describe pod worker-59bdf766d5-qnmhq -n devops-app
-Name:             worker-59bdf766d5-qnmhq
+$ kubectl describe pod worker-bf59788c7-2gvpv -n devops-app
+Name:             worker-bf59788c7-2gvpv
 Namespace:        devops-app
 Priority:         0
 Service Account:  worker
-Node:             k3d-devops-server-0/172.19.0.5
-Start Time:       Thu, 29 Oct 2026 10:36:00 +0200
+Node:             k3d-devops-agent-1/172.19.0.4
+Start Time:       Mon, 09 Nov 2026 23:58:48 +0200
 Labels:           app.kubernetes.io/managed-by=Helm
                   app.kubernetes.io/name=worker
                   app.kubernetes.io/part-of=devops-app
-                  pod-template-hash=59bdf766d5
-Annotations:      checksum/config: 48e67e93d11e72b980da65be0500520a707f4c94ea6f6bebc7e716c43eb70ed0
+                  pod-template-hash=bf59788c7
+Annotations:      checksum/config: e74a6c22bc960b5fe5bf635bf25f14ccef9cd09b2b199c53859bbfa7699a7f6b
 Status:           Running
 SeccompProfile:   RuntimeDefault
-IP:               10.42.2.31
+IP:               10.42.1.99
 IPs:
-  IP:           10.42.2.31
-Controlled By:  ReplicaSet/worker-59bdf766d5
+  IP:           10.42.1.99
+Controlled By:  ReplicaSet/worker-bf59788c7
 Containers:
   worker:
-    Container ID:   containerd://fe5454cb64c751025236bc1f6f7fb8c4f83f3d50590c76d8c366b2a8d023d675
-    Image:          devops-app/worker:088d40c
-    Image ID:       sha256:995f49fb7cec709ffa6c435f1348121824705cbf28c38a097ce7f752f1b10d12
+    Container ID:   containerd://391171fa6e281108d1627044b5aa4cfbe44998aa7e5021d530ab5cd619908ca4
+    Image:          ghcr.io/osk4rum-creator/devops-app/worker:d8e8f42
+    Image ID:       ghcr.io/osk4rum-creator/devops-app/worker@sha256:5f5490badd803e9808a18e6592eb427824d529dd43d66c6ddcf00aa4a1d39e20
     Port:           <none>
     Host Port:      <none>
     State:          Running
-      Started:      Thu, 29 Oct 2026 10:36:00 +0200
+      Started:      Mon, 09 Nov 2026 23:58:55 +0200
     Ready:          True
     Restart Count:  0
     Limits:
@@ -199,12 +204,13 @@ Node-Selectors:  <none>
 Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
                  node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
 Events:
-  Type    Reason     Age   From               Message
-  ----    ------     ----  ----               -------
-  Normal  Scheduled  30m   default-scheduler  Successfully assigned devops-app/worker-59bdf766d5-qnmhq to k3d-devops-server-0
-  Normal  Pulled     30m   kubelet            spec.containers{worker}: Container image "devops-app/worker:088d40c" already present on machine and can be accessed by the pod
-  Normal  Created    30m   kubelet            spec.containers{worker}: Container created
-  Normal  Started    30m   kubelet            spec.containers{worker}: Container started
+  Type    Reason     Age    From               Message
+  ----    ------     ----   ----               -------
+  Normal  Scheduled  2m39s  default-scheduler  Successfully assigned devops-app/worker-bf59788c7-2gvpv to k3d-devops-agent-1
+  Normal  Pulling    2m39s  kubelet            spec.containers{worker}: Pulling image "ghcr.io/osk4rum-creator/devops-app/worker:d8e8f42"
+  Normal  Pulled     2m32s  kubelet            spec.containers{worker}: Successfully pulled image "ghcr.io/osk4rum-creator/devops-app/worker:d8e8f42" in 6.375s (6.375s including waiting). Image size: 64129144 bytes.
+  Normal  Created    2m32s  kubelet            spec.containers{worker}: Container created
+  Normal  Started    2m32s  kubelet            spec.containers{worker}: Container started
 
 $ kubectl describe pod postgres-0 -n devops-app
 Name:             postgres-0
@@ -212,7 +218,7 @@ Namespace:        devops-app
 Priority:         0
 Service Account:  postgres
 Node:             k3d-devops-server-0/172.19.0.5
-Start Time:       Thu, 29 Oct 2026 10:46:47 +0200
+Start Time:       Tue, 10 Nov 2026 00:00:12 +0200
 Labels:           app.kubernetes.io/managed-by=Helm
                   app.kubernetes.io/name=postgres
                   app.kubernetes.io/part-of=devops-app
@@ -222,19 +228,19 @@ Labels:           app.kubernetes.io/managed-by=Helm
 Annotations:      <none>
 Status:           Running
 SeccompProfile:   RuntimeDefault
-IP:               10.42.2.39
+IP:               10.42.2.91
 IPs:
-  IP:           10.42.2.39
+  IP:           10.42.2.91
 Controlled By:  StatefulSet/postgres
 Containers:
   postgres:
-    Container ID:   containerd://61d227cbd647c3a8c7c1ec6e5af78b3327d00a068c6cff0cb628e5104d71bbaf
+    Container ID:   containerd://deea87f30b01bc21909798c699d5246fed2b1ddfb311dbde2adb1689caf95606
     Image:          postgres:17.11-alpine
     Image ID:       docker.io/library/postgres@sha256:266d3c257594e195b309ae9d1805e54c788f1d7b375f56bf6c367aac6c917e7b
     Port:           5432/TCP (postgres)
     Host Port:      0/TCP (postgres)
     State:          Running
-      Started:      Thu, 29 Oct 2026 10:46:47 +0200
+      Started:      Tue, 10 Nov 2026 00:00:13 +0200
     Ready:          True
     Restart Count:  0
     Limits:
@@ -281,8 +287,8 @@ Tolerations:     node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
 Events:
   Type    Reason     Age   From               Message
   ----    ------     ----  ----               -------
-  Normal  Scheduled  19m   default-scheduler  Successfully assigned devops-app/postgres-0 to k3d-devops-server-0
-  Normal  Pulled     19m   kubelet            spec.containers{postgres}: Container image "postgres:17.11-alpine" already present on machine and can be accessed by the pod
-  Normal  Created    19m   kubelet            spec.containers{postgres}: Container created
-  Normal  Started    19m   kubelet            spec.containers{postgres}: Container started
+  Normal  Scheduled  75s   default-scheduler  Successfully assigned devops-app/postgres-0 to k3d-devops-server-0
+  Normal  Pulled     75s   kubelet            spec.containers{postgres}: Container image "postgres:17.11-alpine" already present on machine and can be accessed by the pod
+  Normal  Created    75s   kubelet            spec.containers{postgres}: Container created
+  Normal  Started    75s   kubelet            spec.containers{postgres}: Container started
 
