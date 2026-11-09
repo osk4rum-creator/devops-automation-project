@@ -44,6 +44,14 @@ fi
 kubectl create secret generic db-credentials -n "$NAMESPACE" \
   --from-env-file=secrets/db.env --dry-run=client -o yaml | kubectl apply -f -
 
+# Admin token for the read-only demo mode (generated once, random)
+if [ ! -f secrets/admin.env ]; then
+  echo "==> Generating secrets/admin.env (admin token for the dashboard)"
+  printf 'token=%s\n' "$(openssl rand -hex 24)" > secrets/admin.env
+fi
+kubectl create secret generic app-admin -n "$NAMESPACE" \
+  --from-env-file=secrets/admin.env --dry-run=client -o yaml | kubectl apply -f -
+
 if [ -f secrets/aws.env ]; then
   kubectl create secret generic aws-credentials -n "$NAMESPACE" \
     --from-env-file=secrets/aws.env --dry-run=client -o yaml | kubectl apply -f -

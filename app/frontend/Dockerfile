@@ -19,6 +19,6 @@ ENV NGINX_ENTRYPOINT_LOCAL_RESOLVERS=1 \
     BACKEND_HOST=backend
 
 COPY default.conf.template /etc/nginx/templates/default.conf.template
-COPY index.html /usr/share/nginx/html/index.html
+COPY index.html app.css app.js favicon.svg /usr/share/nginx/html/
 
 EXPOSE 8080

@@ -1,15 +1,29 @@
-# DevOps on AWS – Rolling Project
+# StatusPulse – uptime monitoring on Kubernetes with Jenkins CI/CD
 
-A small three-service app (web frontend, API backend, background worker) with
-PostgreSQL, S3 and SNS, run on **Kubernetes** with a **Helm chart**
-(Task 3) and built and deployed by **Jenkins CI/CD** (Task 4, added below).
+**StatusPulse** watches websites and APIs: a background worker checks every
+monitored URL on its own schedule, records response times, opens an incident
+and **emails an alert (AWS SNS)** when a site goes down, and emails again when it
+recovers. A live dashboard shows status, uptime and response-time history, and
+24-hour reports are exported to **AWS S3**.
+
+It is also my DevOps course project ("DevOps on AWS"): the app runs on a
+multi-node **Kubernetes** cluster through a **Helm chart** (Task 3) and every
+`git push` is tested, scanned and deployed automatically by **Jenkins** running
+inside the cluster (Task 4).
 
 | Task | Status | Where |
 |---|---|---|
 | 1 – App on EC2 | Submitted | – |
 | 2 – Terraform + Ansible | Submitted | [`task2-archive/`](task2-archive/) |
-| **3 – Kubernetes** | **This README** | `app/`, `helm/`, `k8s/`, `scripts/`, `evidence/task3/` |
+| **3 – Kubernetes** | **Sections 1–11** | `app/`, `helm/`, `k8s/`, `terraform/`, `scripts/`, `evidence/task3/` |
 | **4 – Jenkins CI/CD** | **Section 12** | `jenkins/`, `Jenkinsfile-ci`, `Jenkinsfile-cd`, `evidence/task4/` |
+
+### Highlights
+- **Product:** monitors with live status, sparklines, 24h uptime, response-time chart, incident timeline, CSV reports in S3, light/dark mode, works on mobile.
+- **Kubernetes:** Helm chart, 2 replicas of frontend and backend, StatefulSet database with persistent storage, readiness/liveness probes, rolling updates, self-healing.
+- **Public demo:** shared over HTTPS through a **Cloudflare Tunnel** (no open ports) in **read-only mode** - visitors can look, only the admin token can change anything.
+- **Security:** default-deny NetworkPolicies, non-root read-only containers, **3-layer SSRF protection**, strict Content-Security-Policy, least-privilege IAM, no secrets in Git, Trivy image scanning.
+- **CI/CD:** Jenkins as code (Helm + JCasC + Job DSL), push-triggered CI (lint → 49 tests → build → scan → push), separate CD with immutable tags, smoke tests, rollback, full traceability.
 
 ---
 
@@ -17,13 +31,43 @@ PostgreSQL, S3 and SNS, run on **Kubernetes** with a **Helm chart**
 
 | Component | Technology | Role |
 |---|---|---|
-| **frontend** | nginx (unprivileged) | The **only** public entry point. Serves the web page and forwards `/api/*` to the backend |
-| **backend** | Python Flask + gunicorn | REST API: saves and lists notes in PostgreSQL, uploads files to S3 |
-| **worker** | Python | Background loop: every 10 s finds new uploads in the DB and sends an SNS email |
-| **postgres** | PostgreSQL 17 | Stores notes and upload records |
-| S3 / SNS | AWS (outside the cluster) | File storage and email notifications |
+| **frontend** | nginx (unprivileged) + vanilla JS dashboard | The **only** public entry point. Serves the dashboard and forwards `/api/*` to the backend. Sends security headers (CSP, nosniff, frame-deny) |
+| **backend** | Python Flask + gunicorn | REST API: create / pause / delete monitors (with URL validation), summary and uptime statistics, check history, incidents, CSV report export to S3 with expiring download links |
+| **worker** | Python | Every 5 s picks the monitors that are due, checks them **in parallel**, stores each result, and decides the status: **2 failures in a row → DOWN** (incident + SNS email), first success after that → **RECOVERED** (email with downtime). Deletes history older than 7 days |
+| **postgres** | PostgreSQL 17 | Monitors, checks, incidents, reports |
+| S3 / SNS | AWS (outside the cluster) | Report storage (private bucket) and email alerts |
 
-Flow for an upload: `browser → frontend → backend → S3 + DB row → worker sees row → SNS email`.
+```
+check flow:  worker -> (DNS: public IP only?) -> HTTP GET the site -> checks table
+             2 failures -> status = down -> incident opened   -> SNS "DOWN" email
+             success    -> status = up   -> incident resolved -> SNS "RECOVERED" email
+```
+
+### API
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/summary` | Up / down / paused counts, 24h uptime, average response time, open incidents |
+| GET / POST | `/api/monitors` | List monitors (with sparkline data) / add one (`name`, `url`, `interval_seconds` 30–3600) |
+| GET / DELETE | `/api/monitors/<id>` | Details with the last 60 checks and incidents / delete |
+| POST | `/api/monitors/<id>/pause` · `/resume` | Pause or resume checking |
+| GET | `/api/incidents` | Latest 20 incidents |
+| GET / POST | `/api/reports` | List reports / build a 24h CSV, upload to S3, return a presigned link (1 h) |
+| GET | `/api/version` | Image tag, pod name and whether the demo is read-only (shown in the footer) |
+| GET | `/api/auth/check` | Verifies an admin token (`Authorization: Bearer ...`) before the dashboard unlocks |
+| GET | `/healthz`, `/readyz`, `/api/health` | Liveness / readiness (DB) / end-to-end check |
+
+### SSRF protection (why the worker can't be abused)
+Users type in URLs that the worker then fetches **from inside the cluster**. Without
+protection, someone could add `http://postgres:5432`, the Kubernetes API, or the cloud
+metadata endpoint `169.254.169.254` and use StatusPulse to probe the internal network
+(Server-Side Request Forgery). Three independent layers stop that:
+
+1. **API validation:** only `http(s)`, no credentials in the URL, no internal host names (`localhost`, `*.svc`, `*.local`, names without a dot), no private / loopback / link-local IP literals.
+2. **Worker DNS check:** right before every request, every address the host name resolves to must be public (catches a public name that points to an internal IP). Redirects are not followed, and non-http schemes are refused again.
+3. **NetworkPolicy:** the worker's outbound traffic is allowed only to non-private IP ranges, so even a DNS-rebinding trick is dropped at the network level.
+
+Layers 1 and 2 are covered by unit tests; layer 3 by `test-network-policies.sh`.
 
 ## 2. Architecture
 
@@ -50,9 +94,9 @@ flowchart LR
     end
   end
 
-  subgraph aws["AWS eu-central-1 - Terraform (apply blocked, see 8)"]
-    s3[("S3 bucket<br/>private, encrypted")]
-    sns["SNS topic<br/>email subscription"]
+  subgraph aws["AWS eu-central-1 - created by Terraform"]
+    s3[("S3 bucket<br/>reports · private, encrypted")]
+    sns["SNS topic<br/>DOWN / RECOVERED emails"]
   end
 
   lb --> traefik --> ing --> fe
@@ -167,7 +211,7 @@ kubectl create secret generic aws-credentials -n devops-app --from-env-file=secr
 
 ```bash
 ./scripts/collect-evidence.sh        # regenerates everything in evidence/task3/
-./scripts/test-network-policies.sh   # 15 allowed/blocked connection tests
+./scripts/test-network-policies.sh   # 17 allowed/blocked connection tests
 ./scripts/scan-images.sh             # Trivy vulnerability scan of all images
 ```
 
@@ -175,10 +219,10 @@ kubectl create secret generic aws-credentials -n devops-app --from-env-file=secr
 |---|---|
 | [`01-cluster-and-workloads.txt`](evidence/task3/01-cluster-and-workloads.txt) | All `kubectl get` outputs required by the task |
 | [`02-describe-pods.txt`](evidence/task3/02-describe-pods.txt), [`03-logs.txt`](evidence/task3/03-logs.txt) | `describe` and `logs` of every component |
-| [`04-app-tests.txt`](evidence/task3/04-app-tests.txt) | HTTP through the Ingress, frontend → backend, DB write + read, worker processing an upload |
+| [`04-app-tests.txt`](evidence/task3/04-app-tests.txt) | Dashboard through the Ingress, frontend → backend, adding a monitor, SSRF attempts rejected, worker checks + incidents, data in PostgreSQL, S3 report via presigned link (403 without it) |
 | [`05-self-healing.txt`](evidence/task3/05-self-healing.txt) | Pods deleted and replaced, app keeps working, data survives a DB restart |
 | [`06-security-checks.txt`](evidence/task3/06-security-checks.txt) | Non-root users, read-only filesystem, no API token, dropped capabilities, pinned image tags |
-| [`network-policy-tests.txt`](evidence/task3/network-policy-tests.txt) (+ `-BEFORE`) | 15/15 tests pass; before the policies, 7 should-be-blocked connections were open |
+| [`network-policy-tests.txt`](evidence/task3/network-policy-tests.txt) (+ `-BEFORE`) | 17/17 tests pass; before the policies, 7 should-be-blocked connections were open |
 | [`image-scans/SUMMARY.md`](evidence/task3/image-scans/SUMMARY.md) | CRITICAL vulnerabilities 18 → 1 (accepted with reasoning) |
 
 ## 7. Security
@@ -225,7 +269,8 @@ Allow rules are added per component – a connection works only if a rule allows
 | Internet → Ingress → **frontend** :8080 | ✅ | The single public entry point (only Traefik pods may reach the frontend) |
 | frontend → **backend** :8000 | ✅ | nginx forwards `/api` |
 | backend, worker → **postgres** :5432 | ✅ | They read/write data |
-| backend, worker → internet :443 | ✅ | AWS S3/SNS APIs (HTTPS only, private IP ranges excluded) |
+| backend → internet :443 | ✅ | AWS S3 API (HTTPS only, private IP ranges excluded) |
+| worker → internet :443 and :80 | ✅ | SNS + the monitored websites (private IP ranges excluded = SSRF layer 3) |
 | all pods → CoreDNS :53 | ✅ | Name lookup (`backend`, `postgres`) |
 | anything → **worker** | ❌ | The worker accepts no connections at all |
 | frontend → postgres | ❌ | The frontend never needs the DB; limits damage if nginx is compromised |
@@ -277,27 +322,37 @@ component can't starve the others.
 | Access restriction? | Only the frontend has a route; the cluster is reachable only from this machine. On a public cloud: source-IP allowlist on the load balancer or a WAF |
 | Public vs internal traffic separated? | Yes – public traffic enters only through the Ingress; all Services are internal `ClusterIP`; NetworkPolicies allow the frontend to receive traffic only from the ingress controller |
 
-## 8. AWS: S3 and SNS (blocked)
+## 8. AWS: S3 and SNS
 
-[`terraform/`](terraform/) creates a private, encrypted **S3 bucket**, an **SNS
-topic with email subscription**, and an **IAM user** whose policy allows only
-`s3:PutObject`/`s3:GetObject` on `uploads/*` and `sns:Publish` on that one topic.
+[`terraform/`](terraform/) creates, in `eu-central-1`:
 
-**Status:** the code is complete and validated (`terraform validate`), but
-`terraform apply` is blocked – the AWS account was closed by AWS after the free
-credits ran out (outstanding balance under review with AWS billing support).
-Until then the app runs with S3/SNS disabled: uploads return a clear
-`S3 is not configured` error and the worker logs the email it *would* send
-(see [`04-app-tests.txt`](evidence/task3/04-app-tests.txt)). Enabling it needs no
-code changes:
+| Resource | Details |
+|---|---|
+| S3 bucket `devops-app-uploads-<account-id>` | Private (all public access blocked), AES-256 encryption at rest. Reports are written to `uploads/reports/` and shared only through **presigned links that expire after 1 hour** |
+| SNS topic `devops-app-uploads` + email subscription | DOWN / RECOVERED alerts from the worker |
+| IAM user `devops-app-local` + inline policy | **Only** `s3:PutObject` / `s3:GetObject` on `uploads/*` and `sns:Publish` on that one topic |
 
 ```bash
 cd terraform && cp terraform.tfvars.example terraform.tfvars   # set alert_email
-terraform init && terraform plan && terraform apply
-aws iam create-access-key --user-name devops-app-local          # -> secrets/aws.env
-# put terraform outputs into helm/devops-app/values.yaml (S3_BUCKET, SNS_TOPIC_ARN)
-./scripts/deploy-local.sh
+terraform init && terraform plan        # review: "7 to add, 0 to change, 0 to destroy"
+terraform apply                          # then click "Confirm subscription" in the AWS email
+
+# App key - created with the CLI so the secret never lands in terraform.tfstate:
+aws iam create-access-key --user-name devops-app-local \
+    --query 'AccessKey.[AccessKeyId,SecretAccessKey]' --output text \
+  | awk '{print "AWS_ACCESS_KEY_ID="$1; print "AWS_SECRET_ACCESS_KEY="$2}' > secrets/aws.env
+kubectl create secret generic aws-credentials -n devops-app --from-env-file=secrets/aws.env
+
+# Bucket name + topic ARN are not secret: they go into helm/devops-app/values.yaml,
+# then git push -> CI/CD deploys the new configuration.
 ```
+
+**Least privilege, verified:** with the app's key, uploading and reading in `uploads/`
+works; listing the bucket, writing elsewhere, deleting objects and any EC2 call are
+**denied**. Downloading a report without its presigned link returns **403**.
+(During the project the AWS account was suspended after the free credits ran out. It was
+reopened, the leftovers from Tasks 1–2 were removed, a $5/month budget alert was added,
+and everything in this section was recreated by Terraform.)
 
 **Why an IAM user and not IRSA:** IRSA (IAM Roles for Service Accounts) needs
 EKS – AWS trusts the cluster's identity provider and gives each ServiceAccount a
@@ -317,6 +372,31 @@ and the Secret would disappear.
 | What restricts access? | NetworkPolicies (the in-cluster equivalent of the Security Groups used for RDS in Task 2) |
 | Why not RDS? | Practice setup without AWS budget. In production RDS is better: managed backups, Multi-AZ failover, patching, no container image to maintain. Switching = `postgres.enabled=false` + RDS endpoint in `DB_HOST` + RDS security group allowing the node group |
 
+## 8.1 Public demo: Cloudflare Tunnel + read-only mode
+
+```
+visitor --HTTPS--> https://<random>.trycloudflare.com   (Cloudflare edge, valid certificate)
+                          ^
+                          |  outbound connection opened BY the cloudflared pod
+cloudflared (namespace tunnel) ----> Traefik ingress ----> frontend ----> backend
+```
+
+```bash
+./scripts/start-tunnel.sh     # prints the public URL (refuses to start without read-only mode)
+./scripts/stop-tunnel.sh      # URL stops working immediately
+```
+
+| Aspect | How |
+|---|---|
+| Exposure | **No open ports**, no router or firewall change: the `cloudflared` pod connects *out* to Cloudflare, which serves HTTPS. Same idea as the smee.io webhook relay |
+| Path | Tunnel → **Traefik** → frontend, i.e. exactly the path local traffic takes, so the app's NetworkPolicies didn't change. Jenkins is **not** reachable through the tunnel (its Ingress only answers to `jenkins.localhost`) |
+| Read-only mode | When Secret `app-admin` exists, the backend requires `Authorization: Bearer <token>` for every change (add / pause / delete monitors, export reports) and answers `401` otherwise; the token is compared in constant time. The dashboard hides edit buttons and shows a **Read-only demo** badge; the 🔒 button unlocks it with the token from `secrets/admin.env` (kept only in that browser tab's `sessionStorage`) |
+| Tunnel pod hardening | Non-root, read-only filesystem, no capabilities, no Kubernetes token; NetworkPolicy: **no inbound at all**, outbound only to DNS, Traefik and Cloudflare (public IPs, ports 443 / 7844) |
+| Free Quick Tunnel limits | Random URL that changes on every restart, no uptime guarantee, up only while this machine runs. Upgrade path: a cheap domain on a free Cloudflare account → a *named* tunnel with a fixed address |
+
+Verified from the internet: dashboard `200` over HTTPS with a valid certificate, CSP / nosniff / frame-deny
+headers present, `POST /api/monitors` and `DELETE /api/monitors/1` without the token → `401`, a wrong token → `401`.
+
 ## 9. Deleting the environment
 
 ```bash
@@ -333,7 +413,8 @@ cd terraform && terraform destroy      # AWS resources (when the account is acti
 | PostgreSQL in the cluster | No AWS budget; allowed for practice | RDS: backups, failover, patching |
 | Static IAM key for S3/SNS | IRSA impossible outside EKS | Key rotation is manual; IRSA on EKS |
 | Kubernetes Secrets only | Simple, no extra components | External Secrets Operator + AWS Secrets Manager |
-| HTTP only | Localhost, no domain | TLS via ACM or cert-manager |
+| HTTP only locally; HTTPS only via the tunnel | Localhost needs no certificate; Cloudflare provides HTTPS for the public demo | TLS on the ingress itself (ACM or cert-manager) |
+| Single shared admin token for the demo | Simple, enough for a portfolio demo | Real user accounts / SSO with roles |
 | `k3d image import` instead of a registry | No registry needed locally | Task 4 pushes to GHCR |
 | Helm instead of plain manifests | One chart for every environment; required by Task 4's CD | Slightly more to learn than plain YAML |
 | Schema created by the backend on startup | Simple for a small app | A migration tool (e.g. Alembic) as a separate Job |
@@ -523,7 +604,7 @@ credential and all 88 plugins loaded, without any manual step in the UI.
 | Checkout | Clone, show branch / commit / build number; **image tag = 7-char commit SHA** | – |
 | Validate | Required files exist; **hadolint** checks all Dockerfiles | Missing file, Dockerfile rule violation |
 | Lint | **ruff** (style, bugs, security rules `S`) in an isolated virtualenv | Any lint finding |
-| Test | **pytest**, 8 unit tests; results published as JUnit (Tests tab) | Any failing test |
+| Test | **pytest**, 49 unit tests (incl. SSRF protection, alert logic and read-only mode); results published as JUnit (Tests tab) | Any failing test |
 | Build | **BuildKit rootless** builds each image into a tar file | Build error |
 | Scan | **Trivy** on the tar **before** pushing; full HIGH+CRITICAL report archived | Any **CRITICAL with an available fix** |
 | Push | **crane** pushes the scanned tars to GHCR; prints each **digest** | Auth or network error |
@@ -650,6 +731,7 @@ Regenerate with `./scripts/verify-jenkins.sh` and `./scripts/collect-evidence-ta
 | CD #1 failed: `UNAUTHORIZED` from GHCR | New packages are private by default | Made packages public (documented); CD correctly stopped **before** deploying |
 | Webhook didn't trigger CI (1) | Payload URL typo: lowercase `l` instead of capital `I`, missing last letter – GitHub showed ✅ because smee accepts any channel | Copied the exact URL; followed the request hop by hop |
 | Webhook didn't trigger CI (2) | smee-client 5.0.0 strips the trailing `/`; Jenkins answers `POST /github-webhook` with 405 | Captured the raw forwarded request with a netcat pod; pinned smee-client 2.0.4 |
+| Jenkins stuck in `Init:CrashLoopBackOff` after a Docker restart | The plugin-copy init container was interrupted; its retries ran in the same pod, found the read-only files from the first attempt in the shared `emptyDir`, and `cp` waited for an "overwrite?" answer | Deleted the pod: the StatefulSet recreated it with a fresh `emptyDir`; Jenkins home on the PVC kept all jobs and build history |
 | Scripts failed only on Windows | `curl.exe` can't write to `/dev/null` (exit 23) when path conversion is off; `[ ]` in Jenkins API URLs treated as curl patterns (exit 3) | Shell redirects instead of `-o /dev/null`; `curl -g` |
 
 ## 13. Division of work

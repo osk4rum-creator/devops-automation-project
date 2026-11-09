@@ -3,85 +3,180 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>DevOps App</title>
-  <style>
-    body { font-family: system-ui, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #222; }
-    section { border: 1px solid #ddd; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; }
-    input[type=text] { width: 70%; padding: .4rem; }
-    button { padding: .4rem .8rem; }
-    li { margin: .25rem 0; }
-    .muted { color: #777; font-size: .85rem; }
-    #status { font-weight: bold; }
-  </style>
+  <title>StatusPulse · Uptime monitoring</title>
+  <meta name="description" content="StatusPulse - uptime monitoring dashboard">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="app.css">
+  <script src="app.js" defer></script>
 </head>
 <body>
-  <h1>DevOps App</h1>
-  <p>Backend status: <span id="status">checking…</span></p>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a class="brand" href="/" aria-label="StatusPulse home">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="8" class="brand-bg"/>
+          <path d="M5 17h5l3-7 5 13 3-6h6" class="brand-line"/>
+        </svg>
+        <span>StatusPulse</span>
+      </a>
+      <div class="topbar-right">
+        <span class="live" id="live-indicator" title="Dashboard refreshes every 10 seconds">
+          <span class="live-dot"></span><span class="live-text">Live</span>
+        </span>
+        <span class="badge" id="mode-badge" hidden>Read-only demo</span>
+        <button class="icon-btn" id="lock-btn" type="button" aria-label="Unlock admin mode" title="Admin: unlock to make changes" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        </button>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
 
-  <section>
-    <h2>Notes (PostgreSQL)</h2>
-    <form id="note-form">
-      <input type="text" id="note-text" placeholder="Write a note" required>
-      <button type="submit">Save</button>
+  <main class="container">
+    <section class="hero">
+      <div>
+        <h1>System status</h1>
+        <p class="muted" id="hero-subtitle">Checking your services…</p>
+      </div>
+      <button class="btn btn-primary" id="add-btn" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        Add monitor
+      </button>
+    </section>
+
+    <section class="cards" aria-label="Summary">
+      <article class="card stat">
+        <span class="stat-label">Operational</span>
+        <span class="stat-value up-text" id="stat-up">–</span>
+        <span class="stat-hint" id="stat-up-hint">monitors up</span>
+      </article>
+      <article class="card stat">
+        <span class="stat-label">Down</span>
+        <span class="stat-value" id="stat-down">–</span>
+        <span class="stat-hint" id="stat-down-hint">open incidents</span>
+      </article>
+      <article class="card stat">
+        <span class="stat-label">Uptime · 24h</span>
+        <span class="stat-value" id="stat-uptime">–</span>
+        <span class="stat-hint" id="stat-uptime-hint">across all checks</span>
+      </article>
+      <article class="card stat">
+        <span class="stat-label">Avg response</span>
+        <span class="stat-value" id="stat-latency">–</span>
+        <span class="stat-hint">successful checks · 24h</span>
+      </article>
+    </section>
+
+    <div class="layout">
+      <section class="card panel" aria-labelledby="monitors-title">
+        <div class="panel-head">
+          <h2 id="monitors-title">Monitors</h2>
+          <span class="muted small" id="monitor-count"></span>
+        </div>
+        <div id="monitor-list" class="monitor-list" aria-live="polite">
+          <div class="empty">Loading monitors…</div>
+        </div>
+      </section>
+
+      <aside class="side">
+        <section class="card panel" aria-labelledby="incidents-title">
+          <div class="panel-head"><h2 id="incidents-title">Recent incidents</h2></div>
+          <ul id="incident-list" class="feed"><li class="empty">No incidents yet.</li></ul>
+        </section>
+
+        <section class="card panel" aria-labelledby="reports-title">
+          <div class="panel-head">
+            <h2 id="reports-title">Reports</h2>
+            <span class="badge" id="s3-badge">S3</span>
+          </div>
+          <p class="muted small">Export a 24-hour uptime report as CSV. It is stored in a private S3 bucket and shared through a link that expires after one hour.</p>
+          <button class="btn btn-secondary btn-block" id="report-btn" type="button">Export 24h report</button>
+          <ul id="report-list" class="feed compact"></ul>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <span>Served by pod <code id="pod-name">…</code> · version <code id="app-version">…</code></span>
+      <span>Built with Flask, PostgreSQL, Kubernetes &amp; Jenkins CI/CD ·
+        <a href="https://github.com/osk4rum-creator/devops-automation-project" rel="noopener" target="_blank">source on GitHub</a></span>
+    </div>
+  </footer>
+
+  <!-- Add monitor -->
+  <dialog id="add-dialog" class="dialog" aria-labelledby="add-title">
+    <form id="add-form" method="dialog" novalidate>
+      <h2 id="add-title">Add monitor</h2>
+      <label>Name
+        <input name="name" required maxlength="60" placeholder="My API" autocomplete="off">
+      </label>
+      <label>URL
+        <input name="url" type="url" required placeholder="https://api.example.com/health" autocomplete="off">
+      </label>
+      <label>Check every
+        <select name="interval_seconds">
+          <option value="30">30 seconds</option>
+          <option value="60" selected>1 minute</option>
+          <option value="300">5 minutes</option>
+          <option value="900">15 minutes</option>
+          <option value="3600">1 hour</option>
+        </select>
+      </label>
+      <p class="form-error" id="add-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" type="button" data-close>Cancel</button>
+        <button class="btn btn-primary" type="submit">Start monitoring</button>
+      </div>
     </form>
-    <ul id="notes"></ul>
-  </section>
+  </dialog>
 
-  <section>
-    <h2>Files (S3 + SNS email)</h2>
-    <form id="upload-form">
-      <input type="file" id="file" required>
-      <button type="submit">Upload</button>
+  <!-- Monitor details -->
+  <dialog id="detail-dialog" class="dialog dialog-wide" aria-labelledby="detail-name">
+    <div class="detail-head">
+      <div>
+        <h2 id="detail-name">Monitor</h2>
+        <a id="detail-url" class="muted small break" target="_blank" rel="noopener noreferrer"></a>
+      </div>
+      <button class="icon-btn" type="button" data-close aria-label="Close">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="detail-stats" id="detail-stats"></div>
+    <h3>Response time · last 60 checks</h3>
+    <div id="detail-chart" class="chart"></div>
+    <div class="detail-columns">
+      <div>
+        <h3>Recent checks</h3>
+        <div class="table-wrap"><table class="table" id="detail-checks"></table></div>
+      </div>
+      <div>
+        <h3>Incidents</h3>
+        <ul class="feed" id="detail-incidents"></ul>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- Admin unlock -->
+  <dialog id="unlock-dialog" class="dialog" aria-labelledby="unlock-title">
+    <form id="unlock-form" method="dialog" novalidate>
+      <h2 id="unlock-title">Admin mode</h2>
+      <p class="muted small">This is a public read-only demo. Enter the admin token to add, pause or delete monitors and export reports.
+        The token is kept only in this browser tab.</p>
+      <label>Admin token
+        <input name="token" type="password" required autocomplete="off">
+      </label>
+      <p class="form-error" id="unlock-error" role="alert"></p>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" type="button" data-close>Cancel</button>
+        <button class="btn btn-primary" type="submit">Unlock</button>
+      </div>
     </form>
-    <p id="upload-msg" class="muted"></p>
-    <ul id="uploads"></ul>
-  </section>
+  </dialog>
 
-  <script>
-    const el = (id) => document.getElementById(id);
-
-    async function refresh() {
-      try {
-        const health = await fetch('/api/health');
-        el('status').textContent = health.ok ? 'ready' : 'not ready';
-        const notes = await (await fetch('/api/notes')).json();
-        el('notes').innerHTML = notes.map(n =>
-          `<li>${escapeHtml(n.text)} <span class="muted">${n.created_at}</span></li>`).join('');
-        const uploads = await (await fetch('/api/uploads')).json();
-        el('uploads').innerHTML = uploads.map(u =>
-          `<li>${escapeHtml(u.filename)} <span class="muted">${u.notified ? 'email sent' : 'pending email'}</span></li>`).join('');
-      } catch (e) {
-        el('status').textContent = 'unreachable';
-      }
-    }
-
-    function escapeHtml(s) {
-      return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
-
-    el('note-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await fetch('/api/notes', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({text: el('note-text').value}),
-      });
-      el('note-text').value = '';
-      refresh();
-    });
-
-    el('upload-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const body = new FormData();
-      body.append('file', el('file').files[0]);
-      const res = await fetch('/api/upload', {method: 'POST', body});
-      const data = await res.json();
-      el('upload-msg').textContent = res.ok ? `Uploaded ${data.filename}` : `Error: ${data.error}`;
-      refresh();
-    });
-
-    refresh();
-    setInterval(refresh, 5000);
-  </script>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

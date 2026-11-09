@@ -5,7 +5,8 @@
 #   ingress controller -> frontend:8080
 #   frontend           -> backend:8000
 #   backend, worker    -> postgres:5432
-#   backend, worker    -> internet :443 only (AWS S3 / SNS APIs)
+#   backend            -> internet :443 only (AWS S3 API)
+#   worker             -> internet :443 and :80 (SNS + the websites it monitors)
 #   every pod          -> cluster DNS :53
 #
 # Policies are additive: a connection is allowed if ANY policy allows it.
@@ -107,7 +108,10 @@ spec:
             cidr: 0.0.0.0/0
             except: {{- toYaml .Values.networkPolicy.privateRanges | nindent 14 }}
       ports:
-        - { protocol: TCP, port: 443 }
+        - { protocol: TCP, port: 443 }   # AWS SNS + monitored https:// sites
+        - { protocol: TCP, port: 80 }    # monitored http:// sites
+      # Private ranges stay excluded: even if a monitored name resolves to an
+      # internal IP (DNS rebinding), the packets are dropped (SSRF layer 3).
 ---
 # --- 6. postgres: reachable only from backend and worker; no outbound at all -----
 apiVersion: networking.k8s.io/v1

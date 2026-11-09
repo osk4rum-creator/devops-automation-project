@@ -1,4 +1,4 @@
-NetworkPolicy tests - 2026-10-31 08:33
+NetworkPolicy tests - 2026-11-07 03:08
 Cluster: k3d-devops   Namespace: devops-app
 
 --- Entry point
@@ -20,6 +20,8 @@ PASS  backend  -> worker (worker accepts no connections)         expected BLOCKE
 --- Outbound (egress)
 PASS  backend  -> AWS API over HTTPS (sts.amazonaws.com:443)     expected ALLOWED got ALLOWED
 PASS  backend  -> internet over plain HTTP (port 80)             expected BLOCKED got BLOCKED
+PASS  worker   -> internet over HTTP (monitored http:// sites)   expected ALLOWED got ALLOWED
+PASS  worker   -> private range over HTTP (SSRF layer 3)         expected BLOCKED got BLOCKED
 PASS  postgres -> internet (database makes no outbound calls)    expected BLOCKED got BLOCKED
 
-Result: 15 passed, 0 failed   (saved to evidence/task3/network-policy-tests.txt)
+Result: 17 passed, 0 failed   (saved to evidence/task3/network-policy-tests.txt)

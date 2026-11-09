@@ -13,9 +13,14 @@ config:
   DB_PORT: "5432"
   DB_NAME: appdb
   AWS_REGION: eu-central-1
-  S3_BUCKET: ""           # from `terraform output s3_bucket_name` (empty = uploads disabled)
-  SNS_TOPIC_ARN: ""       # from `terraform output sns_topic_arn` (empty = email disabled)
-  POLL_SECONDS: "10"      # how often the worker checks for new uploads
+  S3_BUCKET: devops-app-uploads-890319879195                              # terraform output s3_bucket_name
+  SNS_TOPIC_ARN: arn:aws:sns:eu-central-1:890319879195:devops-app-uploads  # terraform output sns_topic_arn
+  # StatusPulse worker
+  POLL_SECONDS: "5"               # how often the worker looks for monitors that are due
+  CHECK_TIMEOUT_SECONDS: "10"     # a site slower than this counts as down
+  FAILURES_BEFORE_DOWN: "2"       # failed checks in a row before alerting (avoids false alarms)
+  RETENTION_DAYS: "7"             # check history kept in the database
+  SEED_DEMO: "true"               # add 4 demo monitors on first start (empty database only)
 
 frontend:
   replicas: 2

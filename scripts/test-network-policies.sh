@@ -69,6 +69,8 @@ check "backend  -> worker (worker accepts no connections)"       BLOCKED py_conn
 echo "--- Outbound (egress)" | tee -a "$OUT"
 check "backend  -> AWS API over HTTPS (sts.amazonaws.com:443)" ALLOWED py_connect $BACKEND sts.amazonaws.com 443
 check "backend  -> internet over plain HTTP (port 80)"          BLOCKED py_connect $BACKEND example.com 80
+check "worker   -> internet over HTTP (monitored http:// sites)" ALLOWED py_connect $WORKER example.com 80
+check "worker   -> private range over HTTP (SSRF layer 3)"      BLOCKED py_connect $WORKER 10.43.0.1 80
 check "postgres -> internet (database makes no outbound calls)" BLOCKED nc_connect $POSTGRES 1.1.1.1 443 $NS
 
 kubectl delete namespace np-test --wait=false >/dev/null

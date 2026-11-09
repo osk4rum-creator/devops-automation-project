@@ -35,6 +35,15 @@ spec:
             - configMapRef: { name: app-config }        # DB_HOST, S3_BUCKET, ...
             - secretRef: { name: db-credentials }       # DB_USER, DB_PASSWORD
             - secretRef: { name: aws-credentials, optional: true }  # local only; absent = AWS disabled
+          env:
+            # Shown in the dashboard footer: which version and which replica answered
+            - name: APP_VERSION
+              value: {{ .Values.image.tag | quote }}
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }   # Kubernetes "downward API"
+            # Read-only demo mode: if Secret "app-admin" exists, changes need this token
+            - name: ADMIN_TOKEN
+              valueFrom: { secretKeyRef: { name: app-admin, key: token, optional: true } }
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           # Readiness: only send traffic once the DB is reachable

@@ -1,4 +1,4 @@
-# nginx is the system's single entry point: serves the web page and
+# nginx is the system's single entry point: serves the dashboard and
 # reverse-proxies /api/ to the backend Service inside the cluster.
 #
 # This is a TEMPLATE: at container start the nginx image replaces ${VARS}
@@ -6,7 +6,17 @@
 server {
     listen 8080;                 # unprivileged image: non-root can't bind port 80
     server_name _;
-    client_max_body_size 10m;    # matches the backend upload limit
+    server_tokens off;           # don't advertise the nginx version
+    client_max_body_size 1m;
+
+    # Browser security headers (apply to every response)
+    #  CSP: only our own scripts/styles may run - injected <script> tags are refused (XSS defense).
+    #  S3 report links are plain navigations, so they are not affected.
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
 
     # Look up the backend's address when a request arrives, not only once at
     # startup. Without this, nginx crashes if cluster DNS isn't ready yet when
@@ -15,15 +25,18 @@ server {
     resolver ${NGINX_LOCAL_RESOLVERS} valid=10s ipv6=off;
     set $backend_upstream http://${BACKEND_HOST}:8000;
 
+    root /usr/share/nginx/html;
+
     location / {
-        root  /usr/share/nginx/html;
         index index.html;
+        try_files $uri $uri/ /index.html;
     }
 
     location /api/ {
         proxy_pass $backend_upstream;
         proxy_set_header Host $host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 30s;
     }
 
     # Probe endpoint for nginx itself (doesn't depend on the backend)

@@ -1,7 +1,7 @@
 # Project progress – Tasks 3 & 4
 
-**Overall: 28 / 29 done (97%)**
-`[████████████████████████████░]`
+**Overall: 29 / 29 done (100%)** ✅ Tasks 3 & 4 complete
+`[█████████████████████████████]`
 
 ⚠️ **Exam on Nov 1.** Plan: Oct 29 Task 3 + Jenkins install ✅ · Oct 30 CI + CD pipelines · Oct 31 webhook, demos, Task 4 docs · Nov 1 review only.
 
@@ -21,7 +21,7 @@
 - [x] **App working at http://localhost:8080** 🎯
 - [x] NetworkPolicies, plus proof that they block traffic (15/15 tests, before/after in `evidence/task3/`)
 - [x] Trivy image scan: 18 CRITICAL → 1 (accepted, documented), frontend fully clean
-- [ ] S3 upload + SNS email working *(⛔ BLOCKED: AWS account closed. Code + Terraform ready; documented in README §8)*
+- [x] S3 + SNS working (account reopened Nov 7; Terraform applied; least-privilege key verified)
 - [x] Evidence collected with one script (`./scripts/collect-evidence.sh`)
 - [x] README + security chapter + architecture diagram
 - [x] Pushed to GitHub, **Task 3 ready to submit** 🎯
@@ -48,5 +48,14 @@
 
 ---
 
+## Portfolio upgrade – StatusPulse (Nov 7)
+- [x] AWS cleaned up (leftovers deleted), IAM admin user with MFA, $5 budget alert
+- [x] App rebuilt as **StatusPulse** uptime monitor (API, worker with alerts, dashboard)
+- [x] 3-layer SSRF protection, CSP headers, 49 unit tests, lint clean
+- [x] Tested locally: real checks, incident + SNS email, S3 report via presigned link, 17/17 network tests
+- [x] Read-only demo mode (admin token) + public Cloudflare Quick Tunnel, verified from the internet
+- [ ] Push → CI/CD deploys it → refresh evidence
+- [ ] Add a dashboard screenshot to the README (`docs/screenshot.png`)
+
 ### Blockers
-- AWS account closed (unpaid $20). Waiver requested. Only S3/SNS depend on it – documented as blocked.
+- None.
