@@ -1,5 +1,7 @@
 # StatusPulse – uptime monitoring on Kubernetes with Jenkins CI/CD
 
+![StatusPulse dashboard: monitors with live status, response-time sparklines, uptime, incidents and S3 reports](docs/screenshot.png)
+
 **StatusPulse** watches websites and APIs: a background worker checks every
 monitored URL on its own schedule, records response times, opens an incident
 and **emails an alert (AWS SNS)** when a site goes down, and emails again when it

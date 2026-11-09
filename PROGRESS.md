@@ -55,7 +55,7 @@
 - [x] Tested locally: real checks, incident + SNS email, S3 report via presigned link, 17/17 network tests
 - [x] Read-only demo mode (admin token); optional Cloudflare Quick Tunnel tested, then switched off (localhost only)
 - [x] Pushed → CI #10 (49/49 tests) → CD #9 deployed d8e8f42 → evidence refreshed
-- [ ] Add a dashboard screenshot to the README (`docs/screenshot.png`)
+- [x] Dashboard screenshot at the top of the README (`docs/screenshot.png`)
 
 ### Blockers
 - None.
